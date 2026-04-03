@@ -318,13 +318,16 @@ async function escanearTabla(input) {
 function extraerMacros(texto) {
   const t = texto.toLowerCase();
 
-  function buscarValor(patrones) {
-    for (const patron of patrones) {
-      const match = t.match(patron);
-      if (match) return Math.round(parseFloat(match[1].replace(',', '.')));
+function buscarValor(patrones) {
+  for (const patron of patrones) {
+    const match = t.match(patron);
+    if (match) {
+      const valor = match[1].replace(',', '.');
+      return parseFloat(valor);
     }
-    return 0;
   }
+  return 0;
+}
 
   return {
     calorias: buscarValor([

@@ -221,3 +221,11 @@ button:active { background: #15803d; }
   height: 1px;
   background: #e5e7eb;
 }
+
+.leyenda {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin: 1.5rem 1rem 0.5rem;
+  letter-spacing: 0.03em;
+}
