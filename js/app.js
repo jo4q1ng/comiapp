@@ -150,36 +150,12 @@ function seleccionarResultado(i) {
 }
 
 // ─── Sacar Foto al codigo de barras ─────────────────────────
-async function leerFoto(input) {
-  const archivo = input.files[0];
-  if (!archivo) return;
-
-  document.getElementById('estado-escaner').textContent = 'Leyendo código de barras...';
-
-  const img = new Image();
-  img.src = URL.createObjectURL(archivo);
-
-  img.onload = async () => {
-    const canvas = document.getElementById('canvas-barras');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    try {
-      const codeReader = new ZXing.BrowserMultiFormatReader();
-      const resultado = await codeReader.decodeFromImageElement(img);
-      const codigo = resultado.getText();
-      document.getElementById('estado-escaner').textContent = 'Buscando producto...';
-      await buscarPorBarras(codigo);
-    } catch {
-      document.getElementById('estado-escaner').textContent = 'No se pudo leer el código. Intenta con mejor iluminación o usa el buscador.';
-    }
-
-    input.value = '';
-  };
+async function buscarManualBarras() {
+  const codigo = document.getElementById('input-barras').value.trim();
+  if (!codigo) { alert('Ingresa el código de barras'); return; }
+  document.getElementById('estado-escaner').textContent = 'Buscando producto...';
+  await buscarPorBarras(codigo);
+  document.getElementById('input-barras').value = '';
 }
 
 async function buscarPorBarras(codigo) {

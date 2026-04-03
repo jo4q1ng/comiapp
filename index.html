@@ -52,15 +52,14 @@
     </section>
 
     <!-- Tab: Código de barras -->
-    <section class="tab-content oculto" id="tab-barras">
-      <div class="formulario">
-        <p class="estado-texto">Saca una foto al código de barras del producto</p>
-        <label class="btn-foto" for="input-foto">📷 Tomar foto del código</label>
-        <input type="file" id="input-foto" accept="image/*" capture="environment" onchange="leerFoto(this)" style="display:none" />
-        <canvas id="canvas-barras" style="display:none"></canvas>
-        <p id="estado-escaner" class="estado-texto"></p>
-      </div>
-    </section>
+<section class="tab-content oculto" id="tab-barras">
+  <div class="formulario">
+    <p class="estado-texto" style="margin-bottom:0.75rem">Escribe el número que aparece bajo el código de barras del producto</p>
+    <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
+    <button onclick="buscarManualBarras()">🔍 Buscar producto</button>
+    <p id="estado-escaner" class="estado-texto"></p>
+  </div>
+</section>
 
     <!-- Tab: Manual -->
     <section class="tab-content oculto" id="tab-manual">
@@ -93,7 +92,6 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/zxing-js/library/umd/index.min.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
 </body>
