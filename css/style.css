@@ -177,3 +177,16 @@ button:active { background: #15803d; }
 }
 
 .cargando { text-align: center; color: #6b7280; font-size: 0.85rem; padding: 1rem; }
+
+.btn-foto {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: #16a34a;
+  color: white;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 0.25rem;
+}

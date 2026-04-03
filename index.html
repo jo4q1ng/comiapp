@@ -54,11 +54,10 @@
     <!-- Tab: Código de barras -->
     <section class="tab-content oculto" id="tab-barras">
       <div class="formulario">
-        <button onclick="toggleEscaner()">📷 Abrir cámara</button>
-        <div id="escaner-container" class="oculto">
-          <div id="escaner"></div>
-          <button onclick="detenerEscaner()" class="btn-cancelar">Cancelar</button>
-        </div>
+        <p class="estado-texto">Saca una foto al código de barras del producto</p>
+        <label class="btn-foto" for="input-foto">📷 Tomar foto del código</label>
+        <input type="file" id="input-foto" accept="image/*" capture="environment" onchange="leerFoto(this)" style="display:none" />
+        <canvas id="canvas-barras" style="display:none"></canvas>
         <p id="estado-escaner" class="estado-texto"></p>
       </div>
     </section>
@@ -94,7 +93,7 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/zxing-js/library/umd/index.min.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
 </body>

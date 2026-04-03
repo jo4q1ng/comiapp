@@ -149,52 +149,37 @@ function seleccionarResultado(i) {
   });
 }
 
-// ─── Escáner de código de barras ─────────────────────────
-function toggleEscaner() {
-  if (escanerActivo) { detenerEscaner(); return; }
+// ─── Sacar Foto al codigo de barras ─────────────────────────
+async function leerFoto(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
 
-  document.getElementById('escaner-container').classList.remove('oculto');
-  document.getElementById('estado-escaner').textContent = 'Apunta al código de barras...';
+  document.getElementById('estado-escaner').textContent = 'Leyendo código de barras...';
 
-  Quagga.init({
-    inputStream: {
-      name: 'Live',
-      type: 'LiveStream',
-      target: document.getElementById('escaner'),
-      constraints: {
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    },
-    decoder: {
-      readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
-    },
-    locate: true
-  }, (err) => {
-    if (err) {
-      document.getElementById('estado-escaner').textContent = 'No se pudo acceder a la cámara.';
-      return;
+  const img = new Image();
+  img.src = URL.createObjectURL(archivo);
+
+  img.onload = async () => {
+    const canvas = document.getElementById('canvas-barras');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    try {
+      const codeReader = new ZXing.BrowserMultiFormatReader();
+      const resultado = await codeReader.decodeFromImageElement(img);
+      const codigo = resultado.getText();
+      document.getElementById('estado-escaner').textContent = 'Buscando producto...';
+      await buscarPorBarras(codigo);
+    } catch {
+      document.getElementById('estado-escaner').textContent = 'No se pudo leer el código. Intenta con mejor iluminación o usa el buscador.';
     }
-    Quagga.start();
-    escanerActivo = true;
-  });
 
-  Quagga.onDetected(async (result) => {
-    const codigo = result.codeResult.code;
-    detenerEscaner();
-    document.getElementById('estado-escaner').textContent = 'Buscando producto...';
-    await buscarPorBarras(codigo);
-  });
-}
-
-function detenerEscaner() {
-  if (escanerActivo) {
-    Quagga.stop();
-    escanerActivo = false;
-  }
-  document.getElementById('escaner-container').classList.add('oculto');
-  document.getElementById('estado-escaner').textContent = '';
+    input.value = '';
+  };
 }
 
 async function buscarPorBarras(codigo) {
@@ -222,33 +207,6 @@ async function buscarPorBarras(codigo) {
     document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
   }
 }
-
-async function buscarPorBarras(codigo) {
-  try {
-    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
-    const data = await res.json();
-
-    if (data.status !== 1 || !data.product) {
-      document.getElementById('estado-escaner').textContent = 'Producto no encontrado en la base de datos.';
-      return;
-    }
-
-    const p = data.product;
-    const n = p.nutriments || {};
-    document.getElementById('estado-escaner').textContent = '';
-
-    mostrarConfirmacion({
-      nombre: p.product_name || 'Producto sin nombre',
-      calorias: Math.round(n['energy-kcal_100g'] || 0),
-      proteinas: Math.round(n['proteins_100g'] || 0),
-      carbos: Math.round(n['carbohydrates_100g'] || 0),
-      grasas: Math.round(n['fat_100g'] || 0)
-    });
-  } catch {
-    document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
-  }
-}
-
 // ─── Ingreso manual ──────────────────────────────────────
 function agregarManual() {
   const nombre = document.getElementById('nombre').value.trim();
