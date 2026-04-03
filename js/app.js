@@ -367,11 +367,15 @@ function extraerMacros(texto) {
 function abrirConfigCreatina() {
   const horaGuardada = localStorage.getItem('creatina-hora');
   if (horaGuardada) document.getElementById('hora-creatina').value = horaGuardada;
-  document.getElementById('modal-creatina').classList.remove('oculto');
+  const modal = document.getElementById('modal-creatina');
+  modal.classList.remove('oculto');
+  modal.style.display = 'flex';
 }
 
 function cerrarModalCreatina() {
-  document.getElementById('modal-creatina').classList.add('oculto');
+  const modal = document.getElementById('modal-creatina');
+  modal.classList.add('oculto');
+  modal.style.display = 'none';
 }
 
 function guardarRecordatorioCreatina() {
