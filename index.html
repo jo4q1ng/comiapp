@@ -13,12 +13,15 @@
     <header>
         <div class="header-top">
             <div>
-            <h1>🥗 ComiAPP</h1>
-            <p class="fecha" id="fecha-hoy"></p>
+                <h1>🥗 ComiAPP</h1>
+                <p class="fecha" id="fecha-hoy"></p>
             </div>
-            <button class="btn-creatina" onclick="abrirConfigCreatina()" id="btn-creatina-header">
-            💊 Creatina
-            </button>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <button class="btn-creatina" onclick="abrirConfigCreatina()" id="btn-creatina-header">
+                💊 Creatina
+                </button>
+                <span id="hora-creatina-display" style="font-size:0.7rem;color:rgba(255,255,255,0.75);display:none"></span>
+            </div>
         </div>
     </header>
     

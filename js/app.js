@@ -316,51 +316,63 @@ async function escanearTabla(input) {
 }
 
 function extraerMacros(texto) {
-  const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lineas = texto.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
 
-  function buscarEnLineas(patrones) {
+  function extraerPrimerNumero(linea) {
+    const nums = linea.match(/\d+[,.]?\d*/g);
+    if (!nums) return null;
+    return parseFloat(nums[0].replace(',', '.'));
+  }
+
+  function buscarLinea(patrones) {
     for (const linea of lineas) {
       const l = linea.toLowerCase();
       for (const patron of patrones) {
-        const match = l.match(patron);
-        if (match) {
-          // Tomar primer número válido de la línea (columna 100g)
-          const numeros = linea.match(/\d+[,.]?\d*/g);
-          if (numeros && numeros.length > 0) {
-            return parseFloat(numeros[0].replace(',', '.'));
-          }
+        if (patron.test(l)) {
+          const valor = extraerPrimerNumero(linea);
+          if (valor !== null) return valor;
         }
       }
     }
     return 0;
   }
 
-  return {
-    calorias: buscarEnLineas([
-      /energ[ií]a/,
-      /calor[ií]as?/,
-      /calories?/,
-      /kcal/
-    ]),
-    proteinas: buscarEnLineas([
-      /prote[ií]nas?/,
-      /proteins?/
-    ]),
-    carbos: buscarEnLineas([
-      /h\s*de\s*c\s*disp/,
-      /hidratos\s*de\s*carbono/,
-      /carbohidratos/,
-      /carbohydrates?/,
-      /gl[úu]cidos/
-    ]),
-    grasas: buscarEnLineas([
-      /grasa\s*total/,
-      /grasas?\s*totales?/,
-      /l[ií]pidos?\s*totales?/,
-      /fat\s*total/,
-      /total\s*fat/
-    ])
-  };
+  const calorias = buscarLinea([
+    /energ[ií]a/,
+    /calor[ií]as?/,
+    /kcal/
+  ]);
+
+  const proteinas = buscarLinea([
+    /prote[ií]nas?\s*\(g\)/,
+    /prote[ií]nas?/,
+    /proteins?/
+  ]);
+
+  // En Chile se usa "H. de Carbono", "H de C disp.", "Carbohidratos"
+  const carbos = buscarLinea([
+    /h\.\s*de\s*c/,
+    /h\s*de\s*c\s*disp/,
+    /hidratos\s*de\s*carbono/,
+    /carbohidratos?\s*disp/,
+    /carbohidratos?/,
+    /carbohydrates?/,
+    /gl[úu]cidos/
+  ]);
+
+  // Grasa total primero, evitar confusión con grasas saturadas
+  const grasas = buscarLinea([
+    /grasa\s*total\s*\(g\)/,
+    /grasas?\s*totales?\s*\(g\)/,
+    /grasa\s*total/,
+    /grasas?\s*totales?/,
+    /l[ií]pidos?\s*totales?/,
+    /total\s*fat/
+  ]);
+
+  return { calorias, proteinas, carbos, grasas };
 }
 
 // ─── Recordatorio creatina ───────────────────────────────
@@ -383,8 +395,18 @@ function guardarRecordatorioCreatina() {
   if (!hora) { alert('Selecciona una hora'); return; }
   localStorage.setItem('creatina-hora', hora);
   cerrarModalCreatina();
+  mostrarHoraCreatina();
   iniciarVerificadorCreatina();
   alert(`✅ Te recordaremos tomar la creatina a las ${hora}`);
+}
+
+function mostrarHoraCreatina() {
+  const hora = localStorage.getItem('creatina-hora');
+  const display = document.getElementById('hora-creatina-display');
+  if (hora && display) {
+    display.textContent = `⏰ ${hora}`;
+    display.style.display = 'block';
+  }
 }
 
 function iniciarVerificadorCreatina() {
@@ -436,6 +458,7 @@ function pedirPermisoNotificaciones() {
 }
 
 // Iniciar al cargar
+mostrarHoraCreatina();
 pedirPermisoNotificaciones();
 iniciarVerificadorCreatina();
 
