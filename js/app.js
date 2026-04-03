@@ -274,5 +274,88 @@ async function escanearFoto(input) {
   input.value = '';
 }
 
+async function escanearTabla(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
+
+  const estado = document.getElementById('estado-escaner');
+  estado.textContent = '📷 Leyendo tabla nutricional...';
+
+  try {
+    const { data: { text } } = await Tesseract.recognize(archivo, 'spa+eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
+        }
+      }
+    });
+
+    const macros = extraerMacros(text);
+
+    if (!macros.calorias && !macros.proteinas) {
+      estado.textContent = 'No se pudieron leer los valores. Intenta con mejor iluminación o ingresa manualmente.';
+      input.value = '';
+      return;
+    }
+
+    estado.textContent = '';
+    mostrarConfirmacion({
+      nombre: 'Producto escaneado',
+      calorias:  macros.calorias,
+      proteinas: macros.proteinas,
+      carbos:    macros.carbos,
+      grasas:    macros.grasas,
+      por100g: true
+    });
+
+  } catch {
+    estado.textContent = 'Error al procesar la imagen. Intenta de nuevo.';
+  }
+
+  input.value = '';
+}
+
+function extraerMacros(texto) {
+  const t = texto.toLowerCase();
+
+  function buscarValor(patrones) {
+    for (const patron of patrones) {
+      const match = t.match(patron);
+      if (match) return Math.round(parseFloat(match[1].replace(',', '.')));
+    }
+    return 0;
+  }
+
+  return {
+    calorias: buscarValor([
+      /calorias[^\d]*(\d+[\.,]?\d*)/,
+      /calories[^\d]*(\d+[\.,]?\d*)/,
+      /energia[^\d]*(\d+[\.,]?\d*)\s*kcal/,
+      /energy[^\d]*(\d+[\.,]?\d*)\s*kcal/,
+      /valor\s*energ[^\d]*(\d+[\.,]?\d*)/,
+      /kcal[^\d]*(\d+[\.,]?\d*)/
+    ]),
+    proteinas: buscarValor([
+      /prote[ií]nas?[^\d]*(\d+[\.,]?\d*)/,
+      /proteins?[^\d]*(\d+[\.,]?\d*)/,
+      /prote[ií]na\s*(\d+[\.,]?\d*)/
+    ]),
+    carbos: buscarValor([
+      /hidratos[^\d]*(\d+[\.,]?\d*)/,
+      /carbohidratos[^\d]*(\d+[\.,]?\d*)/,
+      /carbohydrates?[^\d]*(\d+[\.,]?\d*)/,
+      /carbos?[^\d]*(\d+[\.,]?\d*)/,
+      /glúcidos[^\d]*(\d+[\.,]?\d*)/
+    ]),
+    grasas: buscarValor([
+      /grasas?\s*totales?[^\d]*(\d+[\.,]?\d*)/,
+      /grasas?[^\d]*(\d+[\.,]?\d*)/,
+      /fats?\s*total[^\d]*(\d+[\.,]?\d*)/,
+      /l[ií]pidos?[^\d]*(\d+[\.,]?\d*)/,
+      /fats?[^\d]*(\d+[\.,]?\d*)/
+    ])
+  };
+}
+
 // ─── Init ────────────────────────────────────────────────
 renderLista();

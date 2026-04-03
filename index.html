@@ -37,13 +37,24 @@
     </section>
 
     <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
-      <button class="tab" onclick="mostrarTab('barras')">📷 Código de barras</button>
-      <label class="btn-foto" for="input-camara" style="margin-bottom:0.5rem">📷 Escanear con cámara</label>
-      <input type="file" id="input-camara" accept="image/*" capture="environment" onchange="escanearFoto(this)" style="display:none" />
-      <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
+    <section class="tab-content oculto" id="tab-barras">
+    <div class="formulario">
+
+        <!-- Escáner código de barras manual -->
+        <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
+        <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
+        <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+
+        <div class="separador">o</div>
+
+        <!-- Escanear tabla nutricional -->
+        <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
+        <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
+        <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
+        <p id="estado-escaner" class="estado-texto"></p>
+
     </div>
+    </section>
 
     <!-- Tab: Buscar -->
     <section class="tab-content" id="tab-buscar">
@@ -101,6 +112,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
 </body>
