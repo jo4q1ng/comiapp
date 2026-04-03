@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#16a34a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+  <title>ComiAPP</title>
+</head>
+<body>
+
+  <header>
+    <h1>🥗 ComiAPP</h1>
+    <p class="fecha" id="fecha-hoy"></p>
+  </header>
+
+  <main>
+    <!-- Resumen del día -->
+    <section class="resumen">
+      <div class="macro">
+        <span class="valor" id="total-calorias">0</span>
+        <span class="label">kcal</span>
+      </div>
+      <div class="macro">
+        <span class="valor" id="total-proteinas">0g</span>
+        <span class="label">proteínas</span>
+      </div>
+      <div class="macro">
+        <span class="valor" id="total-carbos">0g</span>
+        <span class="label">carbos</span>
+      </div>
+      <div class="macro">
+        <span class="valor" id="total-grasas">0g</span>
+        <span class="label">grasas</span>
+      </div>
+    </section>
+
+    <!-- Formulario -->
+    <section class="formulario">
+      <h2>Agregar alimento</h2>
+      <input type="text" id="nombre" placeholder="Nombre del alimento" />
+      <input type="number" id="calorias" placeholder="Calorías (kcal)" />
+      <div class="fila-macros">
+        <input type="number" id="proteinas" placeholder="Proteínas (g)" />
+        <input type="number" id="carbos" placeholder="Carbos (g)" />
+        <input type="number" id="grasas" placeholder="Grasas (g)" />
+      </div>
+      <button onclick="agregarAlimento()">+ Agregar</button>
+    </section>
+
+    <!-- Lista del día -->
+    <section class="lista">
+      <h2>Registro de hoy</h2>
+      <ul id="lista-alimentos"></ul>
+    </section>
+  </main>
+
+  <script src="sw-register.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

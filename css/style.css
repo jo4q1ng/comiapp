@@ -1,0 +1,105 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, sans-serif;
+  background: #f9fafb;
+  color: #111;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+header {
+  background: #16a34a;
+  color: white;
+  padding: 1.2rem 1rem 1rem;
+}
+
+header h1 { font-size: 1.5rem; }
+header .fecha { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.macro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.macro .valor { font-size: 1.2rem; font-weight: 600; color: #16a34a; }
+.macro .label { font-size: 0.7rem; color: #6b7280; }
+
+.formulario, .lista {
+  margin: 1rem;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+h2 { font-size: 1rem; margin-bottom: 0.75rem; color: #374151; }
+
+input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.fila-macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.fila-macros input { margin-bottom: 0.5rem; }
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+
+button:active { background: #15803d; }
+
+.lista ul { list-style: none; }
+
+.lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9rem;
+}
+
+.lista li:last-child { border-bottom: none; }
+
+.li-info { display: flex; flex-direction: column; }
+.li-nombre { font-weight: 500; }
+.li-macros { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
+.li-kcal { font-weight: 600; color: #16a34a; }
+
+.btn-eliminar {
+  width: auto;
+  background: none;
+  color: #ef4444;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.5rem;
+  margin: 0;
+}
