@@ -40,6 +40,8 @@
     <div class="tabs">
       <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
       <button class="tab" onclick="mostrarTab('barras')">📷 Código de barras</button>
+      <label class="btn-foto" for="input-camara" style="margin-bottom:0.5rem">📷 Escanear con cámara</label>
+      <input type="file" id="input-camara" accept="image/*" capture="environment" onchange="escanearFoto(this)" style="display:none" />
       <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
     </div>
 
@@ -77,12 +79,17 @@
 
     <!-- Confirmación de alimento encontrado -->
     <section id="confirmar-panel" class="oculto formulario confirmacion">
-      <p class="confirmar-titulo">¿Agregar este alimento?</p>
-      <div id="confirmar-info"></div>
-      <div class="fila-botones">
-        <button onclick="confirmarAlimento()">✓ Confirmar</button>
-        <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
-      </div>
+        <p class="confirmar-titulo">¿Agregar este alimento?</p>
+        <div id="confirmar-info"></div>
+        <div class="gramos-container" id="gramos-container">
+            <label style="font-size:0.85rem;color:#374151;margin-bottom:0.25rem;display:block">¿Cuántos gramos vas a comer?</label>
+            <input type="number" id="input-gramos" placeholder="Ej: 150" oninput="actualizarCalculo()" />
+            <div id="calculo-resultado" class="calculo-box"></div>
+        </div>
+        <div class="fila-botones">
+            <button onclick="confirmarAlimento()">✓ Confirmar</button>
+            <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
+        </div>
     </section>
 
     <!-- Lista del día -->
@@ -92,6 +99,8 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
 </body>

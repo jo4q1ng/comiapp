@@ -60,26 +60,75 @@ function eliminar(i) {
 // ─── Panel de confirmación ───────────────────────────────
 function mostrarConfirmacion(alimento) {
   alimentoPendiente = alimento;
+  const esPor100g = alimento.por100g !== false;
+
   document.getElementById('confirmar-info').innerHTML = `
     <strong>${alimento.nombre}</strong><br>
-    🔥 ${alimento.calorias} kcal &nbsp;|&nbsp;
-    Proteínas: ${alimento.proteinas}g<br>
-    Carbos: ${alimento.carbos}g &nbsp;|&nbsp;
-    Grasas: ${alimento.grasas}g
+    ${esPor100g
+      ? '📊 Valores por 100g · ' + alimento.calorias + ' kcal · P:' + alimento.proteinas + 'g C:' + alimento.carbos + 'g G:' + alimento.grasas + 'g'
+      : '🔥 ' + alimento.calorias + ' kcal &nbsp;|&nbsp; P:' + alimento.proteinas + 'g C:' + alimento.carbos + 'g G:' + alimento.grasas + 'g'
+    }
   `;
+
+  // Mostrar campo de gramos solo si viene de búsqueda (por 100g)
+  const gramosContainer = document.getElementById('gramos-container');
+  if (esPor100g) {
+    gramosContainer.style.display = 'block';
+    document.getElementById('input-gramos').value = '';
+    document.getElementById('calculo-resultado').innerHTML = '';
+  } else {
+    gramosContainer.style.display = 'none';
+  }
+
   document.getElementById('confirmar-panel').classList.remove('oculto');
   document.getElementById('confirmar-panel').scrollIntoView({ behavior: 'smooth' });
 }
 
+function actualizarCalculo() {
+  const gramos = parseFloat(document.getElementById('input-gramos').value);
+  const div = document.getElementById('calculo-resultado');
+  if (!gramos || gramos <= 0 || !alimentoPendiente) { div.innerHTML = ''; return; }
+
+  const factor = gramos / 100;
+  const kcal  = Math.round(alimentoPendiente.calorias  * factor);
+  const prot  = Math.round(alimentoPendiente.proteinas * factor);
+  const carb  = Math.round(alimentoPendiente.carbos    * factor);
+  const gras  = Math.round(alimentoPendiente.grasas    * factor);
+
+  div.innerHTML = `Para <strong>${gramos}g</strong>: 🔥 ${kcal} kcal · P:${prot}g C:${carb}g G:${gras}g`;
+}
+
 function confirmarAlimento() {
   if (!alimentoPendiente) return;
-  alimentos.push(alimentoPendiente);
+
+  let alimento = { ...alimentoPendiente };
+  const esPor100g = alimento.por100g !== false;
+
+  if (esPor100g) {
+    const gramos = parseFloat(document.getElementById('input-gramos').value);
+    if (!gramos || gramos <= 0) {
+      alert('Ingresa los gramos que vas a comer');
+      return;
+    }
+    const factor = gramos / 100;
+    alimento = {
+      nombre:    alimento.nombre + ` (${gramos}g)`,
+      calorias:  Math.round(alimento.calorias  * factor),
+      proteinas: Math.round(alimento.proteinas * factor),
+      carbos:    Math.round(alimento.carbos    * factor),
+      grasas:    Math.round(alimento.grasas    * factor)
+    };
+  }
+
+  alimentos.push(alimento);
   guardar();
   renderLista();
   alimentoPendiente = null;
   document.getElementById('confirmar-panel').classList.add('oculto');
   document.getElementById('buscador').value = '';
   document.getElementById('resultados-busqueda').innerHTML = '';
+  document.getElementById('input-barras').value = '';
+  document.getElementById('estado-escaner').textContent = '';
 }
 
 function cancelarConfirmacion() {
@@ -193,8 +242,36 @@ function agregarManual() {
     calorias:  parseInt(document.getElementById('calorias').value)  || 0,
     proteinas: parseInt(document.getElementById('proteinas').value) || 0,
     carbos:    parseInt(document.getElementById('carbos').value)    || 0,
-    grasas:    parseInt(document.getElementById('grasas').value)    || 0
+    grasas:    parseInt(document.getElementById('grasas').value)    || 0,
+    por100g: false
   });
+}
+
+async function escanearFoto(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
+
+  document.getElementById('estado-escaner').textContent = 'Leyendo código...';
+
+  try {
+    const detector = new BarcodeDetectorPolyfill({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+    const bitmap = await createImageBitmap(archivo);
+    const resultados = await detector.detect(bitmap);
+
+    if (!resultados.length) {
+      document.getElementById('estado-escaner').textContent = 'No se detectó código. Intenta con mejor iluminación o ingresa el número manualmente.';
+      input.value = '';
+      return;
+    }
+
+    const codigo = resultados[0].rawValue;
+    document.getElementById('estado-escaner').textContent = 'Buscando producto...';
+    await buscarPorBarras(codigo);
+  } catch {
+    document.getElementById('estado-escaner').textContent = 'Error al leer la imagen. Intenta de nuevo.';
+  }
+
+  input.value = '';
 }
 
 // ─── Init ────────────────────────────────────────────────
