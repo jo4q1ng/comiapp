@@ -316,49 +316,124 @@ async function escanearTabla(input) {
 }
 
 function extraerMacros(texto) {
-  const t = texto.toLowerCase();
+  const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-function buscarValor(patrones) {
-  for (const patron of patrones) {
-    const match = t.match(patron);
-    if (match) {
-      const valor = match[1].replace(',', '.');
-      return parseFloat(valor);
+  function buscarEnLineas(patrones) {
+    for (const linea of lineas) {
+      const l = linea.toLowerCase();
+      for (const patron of patrones) {
+        const match = l.match(patron);
+        if (match) {
+          // Tomar primer número válido de la línea (columna 100g)
+          const numeros = linea.match(/\d+[,.]?\d*/g);
+          if (numeros && numeros.length > 0) {
+            return parseFloat(numeros[0].replace(',', '.'));
+          }
+        }
+      }
     }
+    return 0;
   }
-  return 0;
-}
 
   return {
-    calorias: buscarValor([
-      /calorias[^\d]*(\d+[\.,]?\d*)/,
-      /calories[^\d]*(\d+[\.,]?\d*)/,
-      /energia[^\d]*(\d+[\.,]?\d*)\s*kcal/,
-      /energy[^\d]*(\d+[\.,]?\d*)\s*kcal/,
-      /valor\s*energ[^\d]*(\d+[\.,]?\d*)/,
-      /kcal[^\d]*(\d+[\.,]?\d*)/
+    calorias: buscarEnLineas([
+      /energ[ií]a/,
+      /calor[ií]as?/,
+      /calories?/,
+      /kcal/
     ]),
-    proteinas: buscarValor([
-      /prote[ií]nas?[^\d]*(\d+[\.,]?\d*)/,
-      /proteins?[^\d]*(\d+[\.,]?\d*)/,
-      /prote[ií]na\s*(\d+[\.,]?\d*)/
+    proteinas: buscarEnLineas([
+      /prote[ií]nas?/,
+      /proteins?/
     ]),
-    carbos: buscarValor([
-      /hidratos[^\d]*(\d+[\.,]?\d*)/,
-      /carbohidratos[^\d]*(\d+[\.,]?\d*)/,
-      /carbohydrates?[^\d]*(\d+[\.,]?\d*)/,
-      /carbos?[^\d]*(\d+[\.,]?\d*)/,
-      /glúcidos[^\d]*(\d+[\.,]?\d*)/
+    carbos: buscarEnLineas([
+      /h\s*de\s*c\s*disp/,
+      /hidratos\s*de\s*carbono/,
+      /carbohidratos/,
+      /carbohydrates?/,
+      /gl[úu]cidos/
     ]),
-    grasas: buscarValor([
-      /grasas?\s*totales?[^\d]*(\d+[\.,]?\d*)/,
-      /grasas?[^\d]*(\d+[\.,]?\d*)/,
-      /fats?\s*total[^\d]*(\d+[\.,]?\d*)/,
-      /l[ií]pidos?[^\d]*(\d+[\.,]?\d*)/,
-      /fats?[^\d]*(\d+[\.,]?\d*)/
+    grasas: buscarEnLineas([
+      /grasa\s*total/,
+      /grasas?\s*totales?/,
+      /l[ií]pidos?\s*totales?/,
+      /fat\s*total/,
+      /total\s*fat/
     ])
   };
 }
+
+// ─── Recordatorio creatina ───────────────────────────────
+function abrirConfigCreatina() {
+  const horaGuardada = localStorage.getItem('creatina-hora');
+  if (horaGuardada) document.getElementById('hora-creatina').value = horaGuardada;
+  document.getElementById('modal-creatina').classList.remove('oculto');
+}
+
+function cerrarModalCreatina() {
+  document.getElementById('modal-creatina').classList.add('oculto');
+}
+
+function guardarRecordatorioCreatina() {
+  const hora = document.getElementById('hora-creatina').value;
+  if (!hora) { alert('Selecciona una hora'); return; }
+  localStorage.setItem('creatina-hora', hora);
+  cerrarModalCreatina();
+  iniciarVerificadorCreatina();
+  alert(`✅ Te recordaremos tomar la creatina a las ${hora}`);
+}
+
+function iniciarVerificadorCreatina() {
+  const claveHoyCreatina = `creatina-tomada-${hoy.toISOString().slice(0, 10)}`;
+  const tomada = localStorage.getItem(claveHoyCreatina) === 'si';
+  const btn = document.getElementById('btn-creatina-header');
+
+  if (tomada) {
+    btn.textContent = '✅ Creatina';
+    btn.classList.add('tomada');
+    return;
+  }
+
+  const hora = localStorage.getItem('creatina-hora');
+  if (!hora) return;
+
+  // Verificar cada minuto si es hora
+  function verificar() {
+    const ahora = new Date();
+    const [hh, mm] = hora.split(':').map(Number);
+    const yaEsHora = ahora.getHours() === hh && ahora.getMinutes() === mm;
+    const tomadaAhora = localStorage.getItem(claveHoyCreatina) === 'si';
+
+    if (yaEsHora && !tomadaAhora) {
+      if (Notification.permission === 'granted') {
+        new Notification('💊 ComiAPP', {
+          body: '¡Hora de tomar la creatina!',
+          icon: 'https://placehold.co/192x192/16a34a/ffffff?text=C'
+        });
+      }
+      // Mostrar alerta en la app también
+      const confirma = confirm('💊 ¡Hora de tomar la creatina!\n\n¿Ya la tomaste?');
+      if (confirma) {
+        localStorage.setItem(claveHoyCreatina, 'si');
+        btn.textContent = '✅ Creatina';
+        btn.classList.add('tomada');
+      }
+    }
+  }
+
+  verificar();
+  setInterval(verificar, 60000);
+}
+
+function pedirPermisoNotificaciones() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+// Iniciar al cargar
+pedirPermisoNotificaciones();
+iniciarVerificadorCreatina();
 
 // ─── Init ────────────────────────────────────────────────
 renderLista();

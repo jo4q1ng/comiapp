@@ -10,10 +10,28 @@
 </head>
 <body>
 
-  <header>
-    <h1>🥗 ComiAPP</h1>
-    <p class="fecha" id="fecha-hoy"></p>
-  </header>
+    <header>
+        <div class="header-top">
+            <div>
+            <h1>🥗 ComiAPP</h1>
+            <p class="fecha" id="fecha-hoy"></p>
+            </div>
+            <button class="btn-creatina" onclick="abrirConfigCreatina()" id="btn-creatina-header">
+            💊 Creatina
+            </button>
+        </div>
+    </header>
+    
+    <!-- Modal recordatorio creatina -->
+    <div id="modal-creatina" class="modal-overlay oculto">
+        <div class="modal-box">
+            <p class="modal-titulo">💊 Recordatorio de creatina</p>
+            <label style="font-size:0.85rem;color:#374151;display:block;margin-bottom:0.4rem">¿A qué hora quieres que te recuerde?</label>
+            <input type="time" id="hora-creatina" />
+            <button onclick="guardarRecordatorioCreatina()" style="margin-top:0.75rem">Guardar hora</button>
+            <button onclick="cerrarModalCreatina()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+        </div>
+    </div>
 
   <main>
     <!-- Resumen del día -->
