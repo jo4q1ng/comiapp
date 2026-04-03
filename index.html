@@ -38,22 +38,22 @@
 
     <!-- Tabs -->
     <section class="tab-content oculto" id="tab-barras">
-    <div class="formulario">
+        <div class="formulario">
 
-        <!-- Escáner código de barras manual -->
-        <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
-        <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
-        <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+            <!-- Escáner código de barras manual -->
+            <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
+            <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
+            <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
 
-        <div class="separador">o</div>
+            <div class="separador">o</div>
 
-        <!-- Escanear tabla nutricional -->
-        <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
-        <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
-        <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
-        <p id="estado-escaner" class="estado-texto"></p>
+            <!-- Escanear tabla nutricional -->
+            <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
+            <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
+            <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
+            <p id="estado-escaner" class="estado-texto"></p>
 
-    </div>
+        </div>
     </section>
 
     <!-- Tab: Buscar -->
