@@ -1,0 +1,24 @@
+{
+  "name": "comiapp",
+  "version": "1.0.0",
+  "description": "Seguimiento diario de alimentación - PWA",
+  "main": "sw-register.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jo4q1ng/comiapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jo4q1ng/comiapp/issues"
+  },
+  "homepage": "https://github.com/jo4q1ng/comiapp#readme",
+  "dependencies": {
+    "html5-qrcode": "^2.3.8"
+  }
+}

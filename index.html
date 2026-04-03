@@ -36,17 +36,55 @@
       </div>
     </section>
 
-    <!-- Formulario -->
-    <section class="formulario">
-      <h2>Agregar alimento</h2>
-      <input type="text" id="nombre" placeholder="Nombre del alimento" />
-      <input type="number" id="calorias" placeholder="Calorías (kcal)" />
-      <div class="fila-macros">
-        <input type="number" id="proteinas" placeholder="Proteínas (g)" />
-        <input type="number" id="carbos" placeholder="Carbos (g)" />
-        <input type="number" id="grasas" placeholder="Grasas (g)" />
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
+      <button class="tab" onclick="mostrarTab('barras')">📷 Código de barras</button>
+      <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
+    </div>
+
+    <!-- Tab: Buscar -->
+    <section class="tab-content" id="tab-buscar">
+      <div class="formulario">
+        <input type="text" id="buscador" placeholder="Ej: pollo, arroz, manzana..." oninput="buscarAlimento()" />
+        <div id="resultados-busqueda"></div>
       </div>
-      <button onclick="agregarAlimento()">+ Agregar</button>
+    </section>
+
+    <!-- Tab: Código de barras -->
+    <section class="tab-content oculto" id="tab-barras">
+      <div class="formulario">
+        <button onclick="toggleEscaner()">📷 Abrir cámara</button>
+        <div id="escaner-container" class="oculto">
+          <div id="escaner"></div>
+          <button onclick="detenerEscaner()" class="btn-cancelar">Cancelar</button>
+        </div>
+        <p id="estado-escaner" class="estado-texto"></p>
+      </div>
+    </section>
+
+    <!-- Tab: Manual -->
+    <section class="tab-content oculto" id="tab-manual">
+      <div class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre del alimento" />
+        <input type="number" id="calorias" placeholder="Calorías (kcal)" />
+        <div class="fila-macros">
+          <input type="number" id="proteinas" placeholder="Proteínas (g)" />
+          <input type="number" id="carbos" placeholder="Carbos (g)" />
+          <input type="number" id="grasas" placeholder="Grasas (g)" />
+        </div>
+        <button onclick="agregarManual()">+ Agregar</button>
+      </div>
+    </section>
+
+    <!-- Confirmación de alimento encontrado -->
+    <section id="confirmar-panel" class="oculto formulario confirmacion">
+      <p class="confirmar-titulo">¿Agregar este alimento?</p>
+      <div id="confirmar-info"></div>
+      <div class="fila-botones">
+        <button onclick="confirmarAlimento()">✓ Confirmar</button>
+        <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
+      </div>
     </section>
 
     <!-- Lista del día -->
@@ -56,7 +94,8 @@
     </section>
   </main>
 
-  <script src="sw-register.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="js/app.js"></script>
+  <script src="sw-register.js"></script>
 </body>
 </html>
