@@ -39,24 +39,7 @@
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
-      <section class="tab-content oculto" id="tab-barras">
-            <div class="formulario">
-
-                <!-- Escáner código de barras manual -->
-                <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
-                <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
-                <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
-
-                <div class="separador">o</div>
-
-                <!-- Escanear tabla nutricional -->
-                <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
-                <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
-                <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
-                <p id="estado-escaner" class="estado-texto"></p>
-
-            </div>
-        </section>
+      <button class="tab" onclick="mostrarTab('barras')">📷 Código de barras</button>
       <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
     </div>
 
@@ -71,10 +54,20 @@
     <!-- Tab: Código de barras -->
     <section class="tab-content oculto" id="tab-barras">
         <div class="formulario">
-            <p class="estado-texto" style="margin-bottom:0.75rem">Escribe el número que aparece bajo el código de barras del producto</p>
+
+            <!-- Escáner código de barras manual -->
+            <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
             <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
-            <button onclick="buscarManualBarras()">🔍 Buscar producto</button>
+            <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+
+            <div class="separador">o</div>
+
+            <!-- Escanear tabla nutricional -->
+            <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
+            <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
+            <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
             <p id="estado-escaner" class="estado-texto"></p>
+
         </div>
     </section>
 
