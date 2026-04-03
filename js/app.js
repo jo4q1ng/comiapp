@@ -156,29 +156,71 @@ function toggleEscaner() {
   document.getElementById('escaner-container').classList.remove('oculto');
   document.getElementById('estado-escaner').textContent = 'Apunta al código de barras...';
 
-  escaner = new Html5Qrcode('escaner');
-  escaner.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 150 } },
-    async (codigo) => {
-      detenerEscaner();
-      document.getElementById('estado-escaner').textContent = 'Buscando producto...';
-      await buscarPorBarras(codigo);
+  Quagga.init({
+    inputStream: {
+      name: 'Live',
+      type: 'LiveStream',
+      target: document.getElementById('escaner'),
+      constraints: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
     },
-    () => {}
-  ).catch(() => {
-    document.getElementById('estado-escaner').textContent = 'No se pudo acceder a la cámara.';
+    decoder: {
+      readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
+    },
+    locate: true
+  }, (err) => {
+    if (err) {
+      document.getElementById('estado-escaner').textContent = 'No se pudo acceder a la cámara.';
+      return;
+    }
+    Quagga.start();
+    escanerActivo = true;
   });
 
-  escanerActivo = true;
+  Quagga.onDetected(async (result) => {
+    const codigo = result.codeResult.code;
+    detenerEscaner();
+    document.getElementById('estado-escaner').textContent = 'Buscando producto...';
+    await buscarPorBarras(codigo);
+  });
 }
 
 function detenerEscaner() {
-  if (escaner && escanerActivo) {
-    escaner.stop().catch(() => {});
+  if (escanerActivo) {
+    Quagga.stop();
     escanerActivo = false;
   }
   document.getElementById('escaner-container').classList.add('oculto');
+  document.getElementById('estado-escaner').textContent = '';
+}
+
+async function buscarPorBarras(codigo) {
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
+    const data = await res.json();
+
+    if (data.status !== 1 || !data.product) {
+      document.getElementById('estado-escaner').textContent = 'Producto no encontrado. Intenta con el buscador.';
+      return;
+    }
+
+    const p = data.product;
+    const n = p.nutriments || {};
+    document.getElementById('estado-escaner').textContent = '';
+
+    mostrarConfirmacion({
+      nombre: p.product_name || 'Producto sin nombre',
+      calorias: Math.round(n['energy-kcal_100g'] || 0),
+      proteinas: Math.round(n['proteins_100g'] || 0),
+      carbos: Math.round(n['carbohydrates_100g'] || 0),
+      grasas: Math.round(n['fat_100g'] || 0)
+    });
+  } catch {
+    document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
+  }
 }
 
 async function buscarPorBarras(codigo) {
