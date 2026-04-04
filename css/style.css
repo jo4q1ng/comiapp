@@ -485,3 +485,90 @@ input[type="time"] {
   font-size: 0.85rem;
   padding: 1rem 0;
 }
+
+.imc-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 99px;
+  display: inline-block;
+}
+
+.imc-badge.bajo    { background: #dbeafe; color: #1d4ed8; }
+.imc-badge.normal  { background: #dcfce7; color: #15803d; }
+.imc-badge.sobrepeso { background: #fef9c3; color: #a16207; }
+.imc-badge.obesidad  { background: #fee2e2; color: #b91c1c; }
+
+.imc-resultado {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.imc-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Registro de hoy en progreso */
+.progreso-registro {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin: 0 1rem 1rem;
+}
+
+.progreso-registro h2 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: #374151;
+}
+
+.progreso-dia-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.progreso-macro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progreso-macro .valor {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.progreso-macro .label {
+  font-size: 0.65rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.progreso-macro .valor.cal  { color: #16a34a; }
+.progreso-macro .valor.prot { color: #3b82f6; }
+.progreso-macro .valor.carb { color: #f59e0b; }
+.progreso-macro .valor.gras { color: #ef4444; }
+
+.progreso-alimento {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.85rem;
+}
+
+.progreso-alimento:last-child { border-bottom: none; }
+.progreso-alimento-nombre { color: #374151; }
+.progreso-alimento-kcal { color: #16a34a; font-weight: 500; font-size: 0.82rem; }

@@ -264,6 +264,19 @@
             <canvas id="grafico-peso" style="margin-top:1rem;width:100%;max-height:180px"></canvas>
         </div>
 
+        <!-- Estatura e IMC -->
+        <div class="formulario">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+                <h2 style="margin:0">📏 Estatura e IMC</h2>
+                <span id="imc-display" class="imc-badge"></span>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+                <input type="text" inputmode="decimal" id="input-estatura" placeholder="Ej: 1,75 m" style="margin:0;flex:1" />
+                <button onclick="guardarEstatura()" style="width:auto;padding:0.6rem 1rem;margin:0">Guardar</button>
+            </div>
+                <div id="imc-resultado" class="imc-resultado"></div>
+        </div>
+
         <!-- Gráfico calorías semanales -->
         <div class="formulario">
             <h2>🔥 Calorías esta semana</h2>

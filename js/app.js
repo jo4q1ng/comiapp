@@ -993,6 +993,55 @@ function obtenerDatosSemana() {
   return dias;
 }
 
+// ─── Estatura e IMC ──────────────────────────────────────
+function guardarEstatura() {
+  const val = parseFloat(document.getElementById('input-estatura').value.replace(',', '.'));
+  if (!val || val < 0.5 || val > 2.5) { alert('Ingresa una estatura válida en metros (ej: 1,75)'); return; }
+  localStorage.setItem('comiapp-estatura', val);
+  document.getElementById('input-estatura').value = '';
+  calcularIMC();
+}
+
+function calcularIMC() {
+  const estatura = parseFloat(localStorage.getItem('comiapp-estatura'));
+  const pesos    = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+  const peso     = pesos.length > 0 ? pesos[pesos.length - 1].peso : null;
+
+  const badge     = document.getElementById('imc-display');
+  const resultado = document.getElementById('imc-resultado');
+
+  // Mostrar estatura guardada
+  const estaturaInput = document.getElementById('input-estatura');
+  if (estatura) estaturaInput.placeholder = `Actual: ${formatNum(estatura)} m`;
+
+  if (!estatura || !peso) {
+    resultado.innerHTML = estatura && !peso
+      ? '<p>Registra tu peso para calcular el IMC</p>'
+      : !estatura && peso
+      ? '<p>Ingresa tu estatura para calcular el IMC</p>'
+      : '<p>Ingresa tu peso y estatura para calcular el IMC</p>';
+    badge.textContent = '';
+    return;
+  }
+
+  const imc = peso / (estatura * estatura);
+  let categoria, clase;
+
+  if      (imc < 18.5) { categoria = 'Bajo peso';    clase = 'bajo'; }
+  else if (imc < 25)   { categoria = 'Peso normal';   clase = 'normal'; }
+  else if (imc < 30)   { categoria = 'Sobrepeso';     clase = 'sobrepeso'; }
+  else                 { categoria = 'Obesidad';       clase = 'obesidad'; }
+
+  badge.textContent = categoria;
+  badge.className   = `imc-badge ${clase}`;
+
+  resultado.innerHTML = `
+    <span class="imc-valor">${imc.toFixed(1)}</span>
+    <span>Peso: <strong>${formatNum(peso)} kg</strong> · Estatura: <strong>${formatNum(estatura)} m</strong></span><br>
+    <span>Categoría: <strong>${categoria}</strong></span>
+  `;
+}
+
 // ─── Gráficos ────────────────────────────────────────────
 let graficoPeso     = null;
 let graficoCalorias = null;
@@ -1001,13 +1050,65 @@ let graficoMacros   = null;
 function renderProgreso() {
   const semana = obtenerDatosSemana();
   const labels = semana.map(d => d.label);
-  const metas  = cargarMetas();
 
   // Peso actual
-  const pesos = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+  const pesos      = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
   const ultimoPeso = pesos.length > 0 ? pesos[pesos.length - 1] : null;
   document.getElementById('peso-actual-display').textContent =
     ultimoPeso ? `${formatNum(ultimoPeso.peso)} kg` : '';
+
+  // IMC
+  calcularIMC();
+
+  // Registro de hoy en progreso
+  const totalCal  = alimentos.reduce((s, a) => s + (parseFloat(a.calorias)  || 0), 0);
+  const totalProt = alimentos.reduce((s, a) => s + (parseFloat(a.proteinas) || 0), 0);
+  const totalCarb = alimentos.reduce((s, a) => s + (parseFloat(a.carbos)    || 0), 0);
+  const totalGras = alimentos.reduce((s, a) => s + (parseFloat(a.grasas)    || 0), 0);
+
+  // Insertar registro del día si no existe el contenedor
+  let regContainer = document.getElementById('progreso-registro-hoy');
+  if (!regContainer) {
+    regContainer = document.createElement('div');
+    regContainer.id = 'progreso-registro-hoy';
+    regContainer.className = 'progreso-registro';
+    document.getElementById('tab-progreso').insertBefore(
+      regContainer,
+      document.getElementById('tab-progreso').firstChild
+    );
+  }
+
+  const listaAlimentos = alimentos.length === 0
+    ? '<p style="color:#9ca3af;font-size:0.85rem;text-align:center;padding:0.5rem">Sin registros hoy</p>'
+    : alimentos.map(a => `
+        <div class="progreso-alimento">
+          <span class="progreso-alimento-nombre">${a.nombre}</span>
+          <span class="progreso-alimento-kcal">${formatNum(a.calorias)} kcal</span>
+        </div>
+      `).join('');
+
+  regContainer.innerHTML = `
+    <h2>📋 Registro de hoy</h2>
+    <div class="progreso-dia-resumen">
+      <div class="progreso-macro">
+        <span class="valor cal">${formatNum(totalCal)}</span>
+        <span class="label">kcal</span>
+      </div>
+      <div class="progreso-macro">
+        <span class="valor prot">${formatNum(totalProt)}g</span>
+        <span class="label">proteínas</span>
+      </div>
+      <div class="progreso-macro">
+        <span class="valor carb">${formatNum(totalCarb)}g</span>
+        <span class="label">carbos</span>
+      </div>
+      <div class="progreso-macro">
+        <span class="valor gras">${formatNum(totalGras)}g</span>
+        <span class="label">grasas</span>
+      </div>
+    </div>
+    ${listaAlimentos}
+  `;
 
   // Gráfico peso
   const ctxPeso = document.getElementById('grafico-peso').getContext('2d');
@@ -1075,34 +1176,15 @@ function renderProgreso() {
     data: {
       labels,
       datasets: [
-        {
-          label: 'Proteínas',
-          data: semana.map(d => d.proteinas.toFixed(1)),
-          backgroundColor: 'rgba(59,130,246,0.7)',
-          borderRadius: 4
-        },
-        {
-          label: 'Carbos',
-          data: semana.map(d => d.carbos.toFixed(1)),
-          backgroundColor: 'rgba(245,158,11,0.7)',
-          borderRadius: 4
-        },
-        {
-          label: 'Grasas',
-          data: semana.map(d => d.grasas.toFixed(1)),
-          backgroundColor: 'rgba(239,68,68,0.7)',
-          borderRadius: 4
-        }
+        { label: 'Proteínas', data: semana.map(d => d.proteinas.toFixed(1)), backgroundColor: 'rgba(59,130,246,0.7)',  borderRadius: 4 },
+        { label: 'Carbos',    data: semana.map(d => d.carbos.toFixed(1)),    backgroundColor: 'rgba(245,158,11,0.7)', borderRadius: 4 },
+        { label: 'Grasas',    data: semana.map(d => d.grasas.toFixed(1)),    backgroundColor: 'rgba(239,68,68,0.7)',  borderRadius: 4 }
       ]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          display: true,
-          position: 'bottom',
-          labels: { font: { size: 11 }, boxWidth: 12 }
-        }
+        legend: { display: true, position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } }
       },
       scales: {
         y: { beginAtZero: true, ticks: { font: { size: 11 } } },
