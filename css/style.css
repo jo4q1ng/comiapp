@@ -711,3 +711,53 @@ select {
 .calc-macro-box.prot .valor { color: #3b82f6; }
 .calc-macro-box.carb .valor { color: #f59e0b; }
 .calc-macro-box.gras .valor { color: #ef4444; }
+
+.comida-seccion {
+  margin: 0 1rem 0.75rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.comida-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #374151;
+  background: white;
+}
+
+.comida-header:active { background: #f9fafb; }
+.comida-kcal { font-size: 0.82rem; color: #16a34a; font-weight: 600; }
+.comida-flecha { font-size: 0.75rem; color: #9ca3af; transition: transform 0.2s; }
+.comida-flecha.abierto { transform: rotate(180deg); }
+
+.comida-body { display: none; border-top: 1px solid #f3f4f6; }
+.comida-body.visible { display: block; }
+
+.comida-lista { list-style: none; padding: 0.25rem 0; }
+
+.comida-lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.comida-lista li:last-child { border-bottom: none; }
+.comida-lista .li-nombre { color: #374151; }
+.comida-lista .li-kcal { color: #16a34a; font-weight: 500; font-size: 0.82rem; }
+
+.comida-vacia {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.82rem;
+  padding: 0.75rem;
+}

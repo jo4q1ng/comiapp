@@ -374,9 +374,12 @@ function confirmarAlimento() {
     };
   }
 
+  alimento.comida = comidaSeleccionada;
   alimentos.push(alimento);
   guardar();
   renderLista();
+  renderComidas();
+
   alimentoPendiente = null;
   document.getElementById('confirmar-panel').classList.add('oculto');
   document.getElementById('buscador').value = '';
@@ -384,7 +387,6 @@ function confirmarAlimento() {
   document.getElementById('input-barras').value = '';
   document.getElementById('estado-escaner').textContent = '';
 }
-
 function cancelarConfirmacion() {
   alimentoPendiente = null;
   document.getElementById('confirmar-panel').classList.add('oculto');
@@ -1429,6 +1431,57 @@ function aplicarMetasCalculadora() {
   alert('✅ Metas aplicadas correctamente');
 }
 
+// ─── Comidas ─────────────────────────────────────────────
+let comidaSeleccionada = 'desayuno';
+
+function seleccionarComida(comida) {
+  comidaSeleccionada = comida;
+  ['desayuno', 'almuerzo', 'cena', 'snack'].forEach(c => {
+    document.getElementById(`comida-btn-${c}`).classList.toggle('activo', c === comida);
+  });
+}
+
+function toggleComida(comida) {
+  const body   = document.getElementById(`body-${comida}`);
+  const flecha = document.getElementById(`flecha-${comida}`);
+  body.classList.toggle('visible');
+  flecha.classList.toggle('abierto');
+}
+
+function renderComidas() {
+  const comidas = ['desayuno', 'almuerzo', 'cena', 'snack'];
+
+  comidas.forEach(comida => {
+    const items = alimentos.filter(a => (a.comida || 'desayuno') === comida);
+    const lista = document.getElementById(`lista-${comida}`);
+    const kcalEl = document.getElementById(`kcal-${comida}`);
+
+    const totalKcal = items.reduce((s, a) => s + (parseFloat(a.calorias) || 0), 0);
+    kcalEl.textContent = `${formatNum(totalKcal)} kcal`;
+
+    if (items.length === 0) {
+      lista.innerHTML = '<li class="comida-vacia">Sin alimentos</li>';
+      return;
+    }
+
+    lista.innerHTML = alimentos
+      .map((a, i) => ({ a, i }))
+      .filter(({ a }) => (a.comida || 'desayuno') === comida)
+      .map(({ a, i }) => `
+        <li>
+          <div class="li-info">
+            <span class="li-nombre">${a.nombre}</span>
+            <span class="li-macros" style="font-size:0.72rem;color:#9ca3af">
+              P:${formatNum(a.proteinas)}g C:${formatNum(a.carbos)}g G:${formatNum(a.grasas)}g
+            </span>
+          </div>
+          <span class="li-kcal">${formatNum(a.calorias)} kcal</span>
+          <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
+        </li>
+      `).join('');
+  });
+}
+
 
 // ─── Init ───────────────────────────────────────────────
 // Init
@@ -1438,3 +1491,4 @@ mostrarHoraCreatina();
 renderLista();
 actualizarBarrasMetas();
 actualizarHeaderAgua();
+renderComidas();

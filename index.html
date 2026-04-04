@@ -94,6 +94,7 @@
         <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
         <button class="tab" onclick="mostrarTab('progreso')">📈 Progreso</button>
         <button class="tab" onclick="mostrarTab('calculadora')">🧮 Calc.</button>
+        <button class="tab" onclick="mostrarTab('registro')">🍽️ Hoy</button>
     </div>
 
     <!-- Modal metas -->
@@ -254,16 +255,81 @@
             <input type="number" id="input-gramos" placeholder="Ej: 150" oninput="actualizarCalculo()" />
             <div id="calculo-resultado" class="calculo-box"></div>
         </div>
+
+        <label style="font-size:0.85rem;color:#374151;margin:0.5rem 0 0.25rem;display:block">¿En qué comida?</label>
+        
+        <div class="calc-opciones" style="grid-template-columns:repeat(4,1fr);margin-bottom:0.75rem">
+            <button class="calc-opcion activo" id="comida-btn-desayuno" onclick="seleccionarComida('desayuno')">🌅</button>
+            <button class="calc-opcion" id="comida-btn-almuerzo" onclick="seleccionarComida('almuerzo')">☀️</button>
+            <button class="calc-opcion" id="comida-btn-cena" onclick="seleccionarComida('cena')">🌙</button>
+            <button class="calc-opcion" id="comida-btn-snack" onclick="seleccionarComida('snack')">🍎</button>
+        </div>
         <div class="fila-botones">
             <button onclick="confirmarAlimento()">✓ Confirmar</button>
             <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
         </div>
+
     </section>
 
     <!-- Lista del día -->
-    <section class="lista">
-      <h2>Registro de hoy</h2>
-      <ul id="lista-alimentos"></ul>
+    <!-- Tab: Registro de hoy -->
+    <section class="tab-content oculto" id="tab-registro">
+
+        <div id="comidas-container">
+
+            <div class="comida-seccion" id="comida-desayuno">
+                <div class="comida-header" onclick="toggleComida('desayuno')">
+                    <span>🌅 Desayuno</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <span class="comida-kcal" id="kcal-desayuno">0 kcal</span>
+                        <span class="comida-flecha" id="flecha-desayuno">▼</span>
+                    </div>
+                </div>
+                <div class="comida-body" id="body-desayuno">
+                    <ul class="comida-lista" id="lista-desayuno"></ul>
+                </div>
+            </div>
+
+            <div class="comida-seccion" id="comida-almuerzo">
+                <div class="comida-header" onclick="toggleComida('almuerzo')">
+                    <span>☀️ Almuerzo</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <span class="comida-kcal" id="kcal-almuerzo">0 kcal</span>
+                        <span class="comida-flecha" id="flecha-almuerzo">▼</span>
+                    </div>
+                </div>
+                <div class="comida-body" id="body-almuerzo">
+                    <ul class="comida-lista" id="lista-almuerzo"></ul>
+                </div>
+            </div>
+
+            <div class="comida-seccion" id="comida-cena">
+                <div class="comida-header" onclick="toggleComida('cena')">
+                    <span>🌙 Cena</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <span class="comida-kcal" id="kcal-cena">0 kcal</span>
+                        <span class="comida-flecha" id="flecha-cena">▼</span>
+                    </div>
+                </div>
+                <div class="comida-body" id="body-cena">
+                    <ul class="comida-lista" id="lista-cena"></ul>
+                </div>
+            </div>
+
+            <div class="comida-seccion" id="comida-snack">
+                <div class="comida-header" onclick="toggleComida('snack')">
+                    <span>🍎 Snack</span>
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <span class="comida-kcal" id="kcal-snack">0 kcal</span>
+                        <span class="comida-flecha" id="flecha-snack">▼</span>
+                    </div>
+                </div>
+                <div class="comida-body" id="body-snack">
+                    <ul class="comida-lista" id="lista-snack"></ul>
+                </div>
+            </div>
+
+        </div>
     </section>
 
     <!-- Tab: Historial -->
