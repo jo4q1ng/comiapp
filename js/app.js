@@ -156,10 +156,12 @@ function extraerMacros(texto) {
 }
 
 function confirmarFotoTabla() {
-  const calorias  = parseFloat(document.getElementById('foto-calorias').value)  || 0;
-  const proteinas = parseFloat(document.getElementById('foto-proteinas').value) || 0;
-  const carbos    = parseFloat(document.getElementById('foto-carbos').value)    || 0;
-  const grasas    = parseFloat(document.getElementById('foto-grasas').value)    || 0;
+  const parsear = id => parseFloat(document.getElementById(id).value.replace(',', '.')) || 0;
+
+  const calorias  = parsear('foto-calorias');
+  const proteinas = parsear('foto-proteinas');
+  const carbos    = parsear('foto-carbos');
+  const grasas    = parsear('foto-grasas');
   const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
 
   if (!calorias && !proteinas && !carbos && !grasas) {
@@ -167,7 +169,10 @@ function confirmarFotoTabla() {
     return;
   }
 
-  cancelarFotoTabla();
+  document.getElementById('foto-preview-container').classList.add('oculto');
+  document.getElementById('foto-preview').src = '';
+  document.getElementById('estado-ocr').textContent = '';
+
   mostrarConfirmacion({ nombre, calorias, proteinas, carbos, grasas, por100g: true });
 }
 
@@ -557,24 +562,6 @@ function mostrarFotoTabla(input) {
   });
 }
 
-function confirmarFotoTabla() {
-  const calorias  = parseFloat(document.getElementById('foto-calorias').value)  || 0;
-  const proteinas = parseFloat(document.getElementById('foto-proteinas').value) || 0;
-  const carbos    = parseFloat(document.getElementById('foto-carbos').value)    || 0;
-  const grasas    = parseFloat(document.getElementById('foto-grasas').value)    || 0;
-  const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
-
-  if (!calorias && !proteinas && !carbos && !grasas) {
-    alert('Ingresa al menos un valor nutricional');
-    return;
-  }
-
-  cancelarFotoTabla();
-  mostrarConfirmacion({
-    nombre, calorias, proteinas, carbos, grasas, por100g: true
-  });
-}
-
 function cancelarFotoTabla() {
   document.getElementById('foto-preview-container').classList.add('oculto');
   document.getElementById('foto-preview').src = '';
@@ -809,22 +796,6 @@ async function escanearTabla(input) {
   }
 
   input.value = '';
-}
-
-function confirmarFotoTabla() {
-  const calorias  = parseFloat(document.getElementById('foto-calorias').value)  || 0;
-  const proteinas = parseFloat(document.getElementById('foto-proteinas').value) || 0;
-  const carbos    = parseFloat(document.getElementById('foto-carbos').value)    || 0;
-  const grasas    = parseFloat(document.getElementById('foto-grasas').value)    || 0;
-  const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
-
-  if (!calorias && !proteinas && !carbos && !grasas) {
-    alert('Ingresa al menos un valor nutricional');
-    return;
-  }
-
-  cancelarFotoTabla();
-  mostrarConfirmacion({ nombre, calorias, proteinas, carbos, grasas, por100g: true });
 }
 
 function cancelarFotoTabla() {
