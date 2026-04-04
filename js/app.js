@@ -201,9 +201,11 @@ function mostrarTab(tab) {
   document.getElementById('tab-' + tab).classList.remove('oculto');
   event.target.classList.add('activo');
   if (tab !== 'barras' && streamActivo) cerrarVisor();
-  if (tab === 'metas')        actualizarBarrasMetas();
-  if (tab === 'historial')    renderHistorial();
-  if (tab === 'progreso')     renderProgreso();
+  if (tab === 'metas')      actualizarBarrasMetas();
+  if (tab === 'historial')  renderHistorial();
+  if (tab === 'progreso')   renderProgreso();
+  if (tab === 'registro')   renderComidas();
+  if (tab === 'bienestar')  { renderBienestarHistorial(); cargarBienestarHoy(); }
 }
 // ─── Guardar y renderizar ────────────────────────────────
 function guardar() {
@@ -1482,6 +1484,94 @@ function renderComidas() {
   });
 }
 
+// ─── Bienestar ───────────────────────────────────────────
+let bienestarHoy = { energia: 0, animo: 0 };
+
+function actualizarSlider(tipo) {
+  const val = document.getElementById(`${tipo}-slider`).value;
+  document.getElementById(`${tipo}-val`).textContent = `${val}h`;
+}
+
+function seleccionarEmoji(tipo, valor, btn) {
+  bienestarHoy[tipo] = valor;
+  const container = document.getElementById(`${tipo}-opciones`);
+  container.querySelectorAll('.emoji-btn').forEach((b, i) => {
+    b.classList.toggle('seleccionado', i + 1 === valor);
+  });
+}
+
+function guardarBienestar() {
+  const sueno  = parseFloat(document.getElementById('sueno-slider').value);
+  const nota   = document.getElementById('bienestar-nota').value.trim();
+  const fecha  = hoy.toISOString().slice(0, 10);
+
+  const registro = {
+    fecha,
+    sueno,
+    energia: bienestarHoy.energia,
+    animo:   bienestarHoy.animo,
+    nota
+  };
+
+  const historial = JSON.parse(localStorage.getItem('comiapp-bienestar') || '[]');
+  const idx = historial.findIndex(r => r.fecha === fecha);
+  if (idx >= 0) historial[idx] = registro;
+  else historial.push(registro);
+
+  historial.sort((a, b) => a.fecha.localeCompare(b.fecha));
+  localStorage.setItem('comiapp-bienestar', JSON.stringify(historial));
+
+  alert('✅ Bienestar guardado');
+  renderBienestarHistorial();
+}
+
+function renderBienestarHistorial() {
+  const div      = document.getElementById('bienestar-historial');
+  const historial = JSON.parse(localStorage.getItem('comiapp-bienestar') || '[]');
+  const ultimos  = historial.slice(-7).reverse();
+
+  if (ultimos.length === 0) {
+    div.innerHTML = '<p class="bienestar-vacio">Sin registros aún</p>';
+    return;
+  }
+
+  const energiaEmojis = ['', '😴', '😕', '😐', '😊', '⚡'];
+  const animoEmojis   = ['', '😢', '😔', '😐', '😊', '😄'];
+
+  div.innerHTML = ultimos.map(r => {
+    const fecha = new Date(r.fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    return `
+      <div class="bienestar-dia">
+        <div class="bienestar-dia-fecha">${fecha}</div>
+        <div class="bienestar-dia-datos">
+          <span class="bienestar-dato">😴 <strong>${r.sueno}h</strong> sueño</span>
+          ${r.energia ? `<span class="bienestar-dato">${energiaEmojis[r.energia]} energía</span>` : ''}
+          ${r.animo   ? `<span class="bienestar-dato">${animoEmojis[r.animo]} ánimo</span>`    : ''}
+        </div>
+        ${r.nota ? `<div class="bienestar-nota-texto">"${r.nota}"</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function cargarBienestarHoy() {
+  const fecha    = hoy.toISOString().slice(0, 10);
+  const historial = JSON.parse(localStorage.getItem('comiapp-bienestar') || '[]');
+  const registro = historial.find(r => r.fecha === fecha);
+  if (!registro) return;
+
+  document.getElementById('sueno-slider').value = registro.sueno;
+  document.getElementById('sueno-val').textContent = `${registro.sueno}h`;
+  document.getElementById('bienestar-nota').value = registro.nota || '';
+
+  if (registro.energia) seleccionarEmoji('energia', registro.energia,
+    document.getElementById('energia-opciones').querySelectorAll('.emoji-btn')[registro.energia - 1]);
+  if (registro.animo) seleccionarEmoji('animo', registro.animo,
+    document.getElementById('animo-opciones').querySelectorAll('.emoji-btn')[registro.animo - 1]);
+}
+
 
 // ─── Init ───────────────────────────────────────────────
 // Init
@@ -1492,3 +1582,4 @@ renderLista();
 actualizarBarrasMetas();
 actualizarHeaderAgua();
 renderComidas();
+cargarBienestarHoy();

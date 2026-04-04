@@ -761,3 +761,97 @@ select {
   font-size: 0.82rem;
   padding: 0.75rem;
 }
+
+.bienestar-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.bienestar-slider-row input[type="range"] {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  border: none;
+  accent-color: #16a34a;
+}
+
+.bienestar-slider-val {
+  font-weight: 600;
+  color: #16a34a;
+  font-size: 0.95rem;
+  min-width: 32px;
+  text-align: right;
+}
+
+.bienestar-emojis {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.emoji-btn {
+  flex: 1;
+  font-size: 1.4rem;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 0.4rem 0;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.emoji-btn.seleccionado {
+  background: #dcfce7;
+  border-color: #16a34a;
+  transform: scale(1.1);
+}
+
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: -apple-system, sans-serif;
+  resize: none;
+  margin-bottom: 0.25rem;
+}
+
+.bienestar-dia {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.bienestar-dia:last-child { border-bottom: none; }
+
+.bienestar-dia-fecha {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 0.35rem;
+}
+
+.bienestar-dia-datos {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.88rem;
+  color: #374151;
+  flex-wrap: wrap;
+}
+
+.bienestar-dato { display: flex; align-items: center; gap: 0.25rem; }
+.bienestar-nota-texto {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-top: 0.35rem;
+  font-style: italic;
+}
+
+.bienestar-vacio {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 1rem 0;
+}

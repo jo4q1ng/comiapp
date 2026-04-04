@@ -95,6 +95,7 @@
         <button class="tab" onclick="mostrarTab('progreso')">📈 Progreso</button>
         <button class="tab" onclick="mostrarTab('calculadora')">🧮 Calc.</button>
         <button class="tab" onclick="mostrarTab('registro')">🍽️ Hoy</button>
+        <button class="tab" onclick="mostrarTab('bienestar')">📝 Bienestar</button>
     </div>
 
     <!-- Modal metas -->
@@ -429,6 +430,54 @@
             <div id="calc-resultado-contenido"></div>
             <button onclick="aplicarMetasCalculadora()" style="margin-top:0.75rem">✅ Aplicar como mis metas</button>
         </div>
+    </section>
+
+    <!-- Tab: Bienestar -->
+    <section class="tab-content oculto" id="tab-bienestar">
+
+        <div class="formulario">
+            <h2>📝 ¿Cómo estás hoy?</h2>
+
+            <!-- Sueño -->
+            <label class="calc-label">😴 Horas de sueño</label>
+            <div class="bienestar-slider-row">
+                <input type="range" id="sueno-slider" min="0" max="12" step="0.5" value="7" oninput="actualizarSlider('sueno')" />
+                <span class="bienestar-slider-val" id="sueno-val">7h</span>
+            </div>
+
+            <!-- Energía -->
+            <label class="calc-label">⚡ Nivel de energía</label>
+            <div class="bienestar-emojis" id="energia-opciones">
+                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 1, this)">😴</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 2, this)">😕</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 3, this)">😐</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 4, this)">😊</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 5, this)">⚡</button>
+            </div>
+
+            <!-- Estado de ánimo -->
+            <label class="calc-label">😊 Estado de ánimo</label>
+            <div class="bienestar-emojis" id="animo-opciones">
+                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 1, this)">😢</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 2, this)">😔</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 3, this)">😐</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 4, this)">😊</button>
+                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 5, this)">😄</button>
+            </div>
+
+            <!-- Nota libre -->
+            <label class="calc-label">📓 Nota del día</label>
+            <textarea id="bienestar-nota" placeholder="¿Algo que quieras recordar de hoy?" rows="3"></textarea>
+
+            <button onclick="guardarBienestar()" style="margin-top:0.75rem">💾 Guardar</button>
+        </div>
+
+        <!-- Historial bienestar -->
+        <div class="formulario">
+            <h2>📅 Últimos 7 días</h2>
+            <div id="bienestar-historial"></div>
+        </div>
+
     </section>
 
     <p class="leyenda">P = Proteínas &nbsp;·&nbsp; C = Carbohidratos &nbsp;·&nbsp; G = Grasas</p>
