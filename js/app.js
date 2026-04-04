@@ -289,6 +289,23 @@ async function escanearTabla(input) {
   estado.textContent = '📷 Procesando imagen...';
 
   try {
+    // Cargar imagen
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(archivo);
+    });
+
+    // Recortar solo el 55% izquierdo (tabla nutricional, sin ingredientes)
+    const canvas = document.createElement('canvas');
+    canvas.width  = Math.floor(img.width * 0.55);
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+
     const worker = await Tesseract.createWorker('spa+eng', 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
@@ -297,7 +314,7 @@ async function escanearTabla(input) {
       }
     });
 
-    const { data: { text } } = await worker.recognize(archivo);
+    const { data: { text } } = await worker.recognize(blob);
     await worker.terminate();
 
     console.log('Texto detectado:', text);
@@ -313,7 +330,7 @@ async function escanearTabla(input) {
 
     estado.textContent = '';
     mostrarConfirmacion({
-      nombre:    'Producto escaneado',
+      nombre:   'Producto escaneado',
       calorias:  macros.calorias,
       proteinas: macros.proteinas,
       carbos:    macros.carbos,
@@ -334,47 +351,31 @@ function extraerMacros(texto) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-  console.log('Líneas procesadas:', lineas);
+  console.log('Líneas:', lineas);
 
-  function extraerPrimerNumeroValido(linea) {
-    // Buscar todos los números con o sin decimal
-    const nums = linea.match(/\d+[,.]\d+|\d{2,}/g);
+  function primerNumero(linea) {
+    const nums = linea.match(/\d+[,.]\d+|\d+/g);
     if (!nums) return null;
-    // Filtrar números que parezcan valores nutricionales (no años, no %)
     for (const n of nums) {
       const val = parseFloat(n.replace(',', '.'));
-      if (val > 0 && val < 10000) return val;
+      if (val >= 0 && val < 5000) return val;
     }
     return null;
   }
 
   function buscarLinea(patrones) {
-    for (const linea of lineas) {
-      const l = linea.toLowerCase().replace(/\s+/g, ' ');
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i].toLowerCase().replace(/\s+/g, ' ');
       for (const patron of patrones) {
         if (patron.test(l)) {
-          console.log(`Match "${patron}" en línea: "${linea}"`);
-          const valor = extraerPrimerNumeroValido(linea);
-          console.log(`Valor extraído: ${valor}`);
-          if (valor !== null) return valor;
-        }
-      }
-    }
-    return 0;
-  }
-
-  // Para calorías buscar también en líneas cercanas si la línea de energía no tiene número
-  function buscarCalorias() {
-    for (let i = 0; i < lineas.length; i++) {
-      const l = lineas[i].toLowerCase();
-      if (/energ[ií]a|kcal/.test(l)) {
-        // Intentar en la misma línea
-        const val = extraerPrimerNumeroValido(lineas[i]);
-        if (val !== null) return val;
-        // Si no hay número, buscar en la línea siguiente
-        if (i + 1 < lineas.length) {
-          const valNext = extraerPrimerNumeroValido(lineas[i + 1]);
-          if (valNext !== null) return valNext;
+          // Intentar en la misma línea
+          let val = primerNumero(lineas[i]);
+          if (val !== null) return val;
+          // Si no hay número, buscar en siguiente línea
+          if (i + 1 < lineas.length) {
+            val = primerNumero(lineas[i + 1]);
+            if (val !== null) return val;
+          }
         }
       }
     }
@@ -382,7 +383,11 @@ function extraerMacros(texto) {
   }
 
   return {
-    calorias: buscarCalorias(),
+    calorias: buscarLinea([
+      /energ[ií]a\s*\(kcal\)/,
+      /energ[ií]a/,
+      /kcal/
+    ]),
     proteinas: buscarLinea([
       /prote[ií]nas?\s*\(g\)/,
       /prote[ií]nas?/
