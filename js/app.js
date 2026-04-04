@@ -301,9 +301,9 @@ function renderLista() {
       <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
     `;
     ul.appendChild(li);
-  });
-  actualizarResumen();
+  });  
   actualizarBarrasMetas();
+  actualizarResumen();
 }
 
 function eliminar(i) {
@@ -950,10 +950,10 @@ function toggleHistorialDia(idx) {
   body.classList.toggle('visible');
   flecha.classList.toggle('abierto');
 }
-// Iniciar al cargar
-mostrarHoraCreatina();
-pedirPermisoNotificaciones();
-iniciarVerificadorCreatina();
 
 // ─── Init ───────────────────────────────────────────────
+pedirPermisoNotificaciones();
+iniciarVerificadorCreatina();
+mostrarHoraCreatina();
 renderLista();
+actualizarBarrasMetas();
