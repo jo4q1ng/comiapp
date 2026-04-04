@@ -209,11 +209,21 @@ function guardar() {
   localStorage.setItem(claveHoy, JSON.stringify(alimentos));
 }
 
+function formatear(valor) {
+  return parseFloat(valor.toFixed(1)); 
+  // convierte "5.0" → 5 y "5.3" → 5.3
+}
+
 function actualizarResumen() {
-  document.getElementById('total-calorias').textContent  = alimentos.reduce((s, a) => s + a.calorias, 0);
-  document.getElementById('total-proteinas').textContent = alimentos.reduce((s, a) => s + a.proteinas, 0) + 'g';
-  document.getElementById('total-carbos').textContent    = alimentos.reduce((s, a) => s + a.carbos, 0) + 'g';
-  document.getElementById('total-grasas').textContent    = alimentos.reduce((s, a) => s + a.grasas, 0) + 'g';
+  const calorias  = alimentos.reduce((s, a) => s + a.calorias, 0);
+  const proteinas = alimentos.reduce((s, a) => s + a.proteinas, 0);
+  const carbos    = alimentos.reduce((s, a) => s + a.carbos, 0);
+  const grasas    = alimentos.reduce((s, a) => s + a.grasas, 0);
+
+  document.getElementById('total-calorias').textContent  = formatear(calorias);
+  document.getElementById('total-proteinas').textContent = formatear(proteinas) + 'g';
+  document.getElementById('total-carbos').textContent    = formatear(carbos) + 'g';
+  document.getElementById('total-grasas').textContent    = formatear(grasas) + 'g';
 }
 
 // ─── Metas diarias ───────────────────────────────────────
