@@ -594,6 +594,171 @@ function pedirPermisoNotificaciones() {
   }
 }
 
+// ─── OCR Tabla nutricional ───────────────────────────────
+function extraerMacros(texto) {
+  const lineas = texto.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
+
+  console.log('Líneas:', lineas);
+
+  function primerNumero(linea) {
+    const nums = linea.match(/\d+[,.]\d+|\d+/g);
+    if (!nums) return null;
+    for (const n of nums) {
+      const val = parseFloat(n.replace(',', '.'));
+      if (val > 0 && val < 5000) return val;
+    }
+    return null;
+  }
+
+  function buscarLinea(patrones) {
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i].toLowerCase().replace(/\s+/g, ' ');
+      for (const patron of patrones) {
+        if (patron.test(l)) {
+          let val = primerNumero(lineas[i]);
+          if (val !== null) return val;
+          if (i + 1 < lineas.length) {
+            val = primerNumero(lineas[i + 1]);
+            if (val !== null) return val;
+          }
+        }
+      }
+    }
+    return 0;
+  }
+
+  return {
+    calorias: buscarLinea([
+      /energ[ií]a\s*\(kcal\)/,
+      /energ[ií]a/,
+      /kcal/
+    ]),
+    proteinas: buscarLinea([
+      /prote[ií]nas?\s*\(g\)/,
+      /prote[ií]nas?/
+    ]),
+    carbos: buscarLinea([
+      /h\s*\.?\s*de\s*c\s*disp/,
+      /hde\s*c/,
+      /hdec/,
+      /hidratos\s*de\s*carbono/,
+      /carbohidratos?\s*disp/,
+      /carbohidratos?/
+    ]),
+    grasas: buscarLinea([
+      /grasa\s*total\s*\(g\)/,
+      /grasa\s*total/,
+      /grasas?\s*totales?/
+    ])
+  };
+}
+
+async function escanearTabla(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
+
+  const estado = document.getElementById('estado-ocr');
+  estado.textContent = '🔍 Procesando imagen...';
+
+  document.getElementById('foto-preview').src = URL.createObjectURL(archivo);
+  document.getElementById('foto-preview-container').classList.remove('oculto');
+  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  try {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(archivo);
+    });
+
+    const canvas = document.createElement('canvas');
+    const maxW = 1200;
+    const scale = img.width > maxW ? maxW / img.width : 1;
+    canvas.width  = img.width  * scale;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Preprocesar: escala de grises + contraste
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const avg = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+      const c   = avg > 128 ? Math.min(255, avg * 1.3) : Math.max(0, avg * 0.7);
+      d[i] = d[i+1] = d[i+2] = c;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+
+    const worker = await Tesseract.createWorker('spa', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          estado.textContent = `Leyendo... ${Math.round(m.progress * 100)}%`;
+        }
+      }
+    });
+
+    await worker.setParameters({
+      tessedit_char_whitelist: 'abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789.,() ',
+      preserve_interword_spaces: '1'
+    });
+
+    const { data: { text } } = await worker.recognize(blob);
+    await worker.terminate();
+
+    console.log('Texto OCR:', text);
+
+    const macros = extraerMacros(text);
+    console.log('Macros:', macros);
+
+    if (macros.calorias)  document.getElementById('foto-calorias').value  = macros.calorias;
+    if (macros.proteinas) document.getElementById('foto-proteinas').value = macros.proteinas;
+    if (macros.carbos)    document.getElementById('foto-carbos').value    = macros.carbos;
+    if (macros.grasas)    document.getElementById('foto-grasas').value    = macros.grasas;
+
+    const n = [macros.calorias, macros.proteinas, macros.carbos, macros.grasas].filter(v => v > 0).length;
+    estado.textContent = n > 0
+      ? `✅ ${n} de 4 valores detectados. Verifica antes de agregar.`
+      : '⚠️ No se detectaron valores. Ingrésalos manualmente.';
+
+  } catch (e) {
+    console.error('Error OCR:', e);
+    estado.textContent = '⚠️ Error al leer. Ingresa los valores manualmente.';
+  }
+
+  input.value = '';
+}
+
+function confirmarFotoTabla() {
+  const calorias  = parseFloat(document.getElementById('foto-calorias').value)  || 0;
+  const proteinas = parseFloat(document.getElementById('foto-proteinas').value) || 0;
+  const carbos    = parseFloat(document.getElementById('foto-carbos').value)    || 0;
+  const grasas    = parseFloat(document.getElementById('foto-grasas').value)    || 0;
+  const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
+
+  if (!calorias && !proteinas && !carbos && !grasas) {
+    alert('Ingresa al menos un valor nutricional');
+    return;
+  }
+
+  cancelarFotoTabla();
+  mostrarConfirmacion({ nombre, calorias, proteinas, carbos, grasas, por100g: true });
+}
+
+function cancelarFotoTabla() {
+  document.getElementById('foto-preview-container').classList.add('oculto');
+  document.getElementById('foto-preview').src = '';
+  document.getElementById('estado-ocr').textContent = '';
+  document.getElementById('input-tabla').value = '';
+}
+
 // Iniciar al cargar
 mostrarHoraCreatina();
 pedirPermisoNotificaciones();
