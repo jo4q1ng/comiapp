@@ -201,10 +201,10 @@ function mostrarTab(tab) {
   document.getElementById('tab-' + tab).classList.remove('oculto');
   event.target.classList.add('activo');
   if (tab !== 'barras' && streamActivo) cerrarVisor();
-  if (tab === 'metas')      actualizarBarrasMetas();
-  if (tab === 'historial')  renderHistorial();
+  if (tab === 'metas')     actualizarBarrasMetas();
+  if (tab === 'historial') renderHistorial();
+  if (tab === 'progreso')  renderProgreso();
 }
-
 // ─── Guardar y renderizar ────────────────────────────────
 function guardar() {
   localStorage.setItem(claveHoy, JSON.stringify(alimentos));
@@ -949,6 +949,167 @@ function toggleHistorialDia(idx) {
   const flecha = document.getElementById(`flecha-${idx}`);
   body.classList.toggle('visible');
   flecha.classList.toggle('abierto');
+}
+
+// ─── Peso corporal ───────────────────────────────────────
+function registrarPeso() {
+  const val = parseFloat(document.getElementById('input-peso').value.replace(',', '.'));
+  if (!val || val <= 0) { alert('Ingresa un peso válido'); return; }
+
+  const pesos = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+  const fecha = hoy.toISOString().slice(0, 10);
+
+  // Reemplazar si ya hay registro hoy
+  const idx = pesos.findIndex(p => p.fecha === fecha);
+  if (idx >= 0) pesos[idx].peso = val;
+  else pesos.push({ fecha, peso: val });
+
+  // Mantener solo últimos 30 días
+  pesos.sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (pesos.length > 30) pesos.splice(0, pesos.length - 30);
+
+  localStorage.setItem('comiapp-pesos', JSON.stringify(pesos));
+  document.getElementById('input-peso').value = '';
+  renderProgreso();
+}
+
+// ─── Datos semanales ─────────────────────────────────────
+function obtenerDatosSemana() {
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const fecha = new Date(hoy);
+    fecha.setDate(fecha.getDate() - i);
+    const clave = `comiapp-${fecha.toISOString().slice(0, 10)}`;
+    const items = JSON.parse(localStorage.getItem(clave) || '[]');
+    const label = fecha.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric' });
+    dias.push({
+      label,
+      calorias:  items.reduce((s, a) => s + (parseFloat(a.calorias)  || 0), 0),
+      proteinas: items.reduce((s, a) => s + (parseFloat(a.proteinas) || 0), 0),
+      carbos:    items.reduce((s, a) => s + (parseFloat(a.carbos)    || 0), 0),
+      grasas:    items.reduce((s, a) => s + (parseFloat(a.grasas)    || 0), 0)
+    });
+  }
+  return dias;
+}
+
+// ─── Gráficos ────────────────────────────────────────────
+let graficoPeso     = null;
+let graficoCalorias = null;
+let graficoMacros   = null;
+
+function renderProgreso() {
+  const semana = obtenerDatosSemana();
+  const labels = semana.map(d => d.label);
+  const metas  = cargarMetas();
+
+  // Peso actual
+  const pesos = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+  const ultimoPeso = pesos.length > 0 ? pesos[pesos.length - 1] : null;
+  document.getElementById('peso-actual-display').textContent =
+    ultimoPeso ? `${formatNum(ultimoPeso.peso)} kg` : '';
+
+  // Gráfico peso
+  const ctxPeso = document.getElementById('grafico-peso').getContext('2d');
+  if (graficoPeso) graficoPeso.destroy();
+  if (pesos.length > 0) {
+    const ultimos = pesos.slice(-14);
+    graficoPeso = new Chart(ctxPeso, {
+      type: 'line',
+      data: {
+        labels: ultimos.map(p => {
+          const f = new Date(p.fecha + 'T00:00:00');
+          return f.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+        }),
+        datasets: [{
+          label: 'Peso (kg)',
+          data: ultimos.map(p => p.peso),
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.1)',
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: '#16a34a',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: false, ticks: { font: { size: 11 } } },
+          x: { ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  // Gráfico calorías
+  const ctxCal = document.getElementById('grafico-calorias').getContext('2d');
+  if (graficoCalorias) graficoCalorias.destroy();
+  graficoCalorias = new Chart(ctxCal, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'kcal',
+        data: semana.map(d => d.calorias.toFixed(1)),
+        backgroundColor: 'rgba(22,163,74,0.7)',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+        x: { ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Gráfico macros
+  const ctxMac = document.getElementById('grafico-macros').getContext('2d');
+  if (graficoMacros) graficoMacros.destroy();
+  graficoMacros = new Chart(ctxMac, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Proteínas',
+          data: semana.map(d => d.proteinas.toFixed(1)),
+          backgroundColor: 'rgba(59,130,246,0.7)',
+          borderRadius: 4
+        },
+        {
+          label: 'Carbos',
+          data: semana.map(d => d.carbos.toFixed(1)),
+          backgroundColor: 'rgba(245,158,11,0.7)',
+          borderRadius: 4
+        },
+        {
+          label: 'Grasas',
+          data: semana.map(d => d.grasas.toFixed(1)),
+          backgroundColor: 'rgba(239,68,68,0.7)',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: { font: { size: 11 }, boxWidth: 12 }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+        x: { ticks: { font: { size: 10 } } }
+      }
+    }
+  });
 }
 
 // ─── Init ───────────────────────────────────────────────

@@ -67,6 +67,7 @@
         <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
         <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
         <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
+        <button class="tab" onclick="mostrarTab('progreso')">📈 Progreso</button>
     </div>
 
     <!-- Modal metas -->
@@ -247,6 +248,36 @@
         </div>
     </section>
 
+    <!-- Tab: Progreso -->
+    <section class="tab-content oculto" id="tab-progreso">
+
+        <!-- Peso corporal -->
+        <div class="formulario">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+                <h2 style="margin:0">⚖️ Peso corporal</h2>
+                <span id="peso-actual-display" style="font-size:1.1rem;font-weight:600;color:#16a34a"></span>
+            </div>
+            <div style="display:flex;gap:0.5rem">
+                <input type="text" inputmode="decimal" id="input-peso" placeholder="Ej: 75,5 kg" style="margin:0;flex:1" />
+                <button onclick="registrarPeso()" style="width:auto;padding:0.6rem 1rem;margin:0">Guardar</button>
+            </div>
+            <canvas id="grafico-peso" style="margin-top:1rem;width:100%;max-height:180px"></canvas>
+        </div>
+
+        <!-- Gráfico calorías semanales -->
+        <div class="formulario">
+            <h2>🔥 Calorías esta semana</h2>
+            <canvas id="grafico-calorias" style="width:100%;max-height:180px"></canvas>
+        </div>
+
+        <!-- Gráfico macros semanales -->
+        <div class="formulario">
+            <h2>💪 Macros esta semana</h2>
+            <canvas id="grafico-macros" style="width:100%;max-height:180px"></canvas>
+        </div>
+
+    </section>
+
     <p class="leyenda">P = Proteínas &nbsp;·&nbsp; C = Carbohidratos &nbsp;·&nbsp; G = Grasas</p>
 
   </main>
@@ -254,6 +285,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
 </body>
