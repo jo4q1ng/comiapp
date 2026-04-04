@@ -75,22 +75,34 @@
 
     <!-- Tab: Código de barras -->
     <section class="tab-content oculto" id="tab-barras">
-        <div class="formulario">
+    <div class="formulario">
 
-            <!-- Escáner código de barras manual -->
-            <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
-            <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
-            <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+        <!-- Código de barras manual -->
+        <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
+        <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
+        <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+        <p id="estado-escaner" class="estado-texto"></p>
 
-            <div class="separador">o</div>
+        <div class="separador">o</div>
 
-            <!-- Escanear tabla nutricional -->
-            <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla nutricional del producto</p>
-            <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
-            <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
-            <p id="estado-escaner" class="estado-texto"></p>
+        <!-- Formulario guiado con foto -->
+        <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía la tabla y escribe los valores de la columna 100g</p>
+        <label class="btn-foto" for="input-tabla">📷 Ver tabla nutricional</label>
+        <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="mostrarFotoTabla(this)" style="display:none" />
 
+        <div id="foto-preview-container" class="oculto">
+            <img id="foto-preview" style="width:100%;border-radius:8px;margin:0.75rem 0" />
+            <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem">Ingresa los valores de la columna <strong>100g</strong>:</p>
+            <input type="number" step="0.1" id="foto-calorias"  placeholder="Energía (kcal)" />
+            <input type="number" step="0.1" id="foto-proteinas" placeholder="Proteínas (g)" />
+            <input type="number" step="0.1" id="foto-carbos"    placeholder="H de C disp. (g)" />
+            <input type="number" step="0.1" id="foto-grasas"    placeholder="Grasa total (g)" />
+            <input type="text"              id="foto-nombre"    placeholder="Nombre del producto (opcional)" />
+            <button onclick="confirmarFotoTabla()">+ Agregar</button>
+            <button onclick="cancelarFotoTabla()" class="btn-cancelar">Cancelar</button>
         </div>
+
+    </div>
     </section>
 
     <!-- Tab: Manual -->

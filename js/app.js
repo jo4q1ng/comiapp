@@ -281,132 +281,41 @@ async function escanearFoto(input) {
   input.value = '';
 }
 
-async function escanearTabla(input) {
+function mostrarFotoTabla(input) {
   const archivo = input.files[0];
   if (!archivo) return;
 
-  const estado = document.getElementById('estado-escaner');
-  estado.textContent = '📷 Procesando imagen...';
+  const url = URL.createObjectURL(archivo);
+  document.getElementById('foto-preview').src = url;
+  document.getElementById('foto-preview-container').classList.remove('oculto');
 
-  try {
-    // Cargar imagen
-    const img = await new Promise((res, rej) => {
-      const i = new Image();
-      i.onload = () => res(i);
-      i.onerror = rej;
-      i.src = URL.createObjectURL(archivo);
-    });
-
-    // Recortar solo el 55% izquierdo (tabla nutricional, sin ingredientes)
-    const canvas = document.createElement('canvas');
-    canvas.width  = Math.floor(img.width * 0.55);
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-
-    const worker = await Tesseract.createWorker('spa+eng', 1, {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
-        }
-      }
-    });
-
-    const { data: { text } } = await worker.recognize(blob);
-    await worker.terminate();
-
-    console.log('Texto detectado:', text);
-
-    const macros = extraerMacros(text);
-    console.log('Macros extraídos:', macros);
-
-    if (!macros.calorias && !macros.proteinas) {
-      estado.textContent = 'No se pudieron leer los valores. Intenta con mejor iluminación o ingresa manualmente.';
-      input.value = '';
-      return;
-    }
-
-    estado.textContent = '';
-    mostrarConfirmacion({
-      nombre:   'Producto escaneado',
-      calorias:  macros.calorias,
-      proteinas: macros.proteinas,
-      carbos:    macros.carbos,
-      grasas:    macros.grasas,
-      por100g:   true
-    });
-
-  } catch (e) {
-    console.error('Error Tesseract:', e);
-    estado.textContent = 'Error al procesar la imagen. Intenta de nuevo.';
-  }
-
-  input.value = '';
+  // Limpiar campos
+  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
 }
 
-function extraerMacros(texto) {
-  const lineas = texto.split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0);
+function confirmarFotoTabla() {
+  const calorias  = parseFloat(document.getElementById('foto-calorias').value);
+  const proteinas = parseFloat(document.getElementById('foto-proteinas').value);
+  const carbos    = parseFloat(document.getElementById('foto-carbos').value);
+  const grasas    = parseFloat(document.getElementById('foto-grasas').value);
+  const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
 
-  console.log('Líneas:', lineas);
-
-  function primerNumero(linea) {
-    const nums = linea.match(/\d+[,.]\d+|\d+/g);
-    if (!nums) return null;
-    for (const n of nums) {
-      const val = parseFloat(n.replace(',', '.'));
-      if (val >= 0 && val < 5000) return val;
-    }
-    return null;
+  if (!calorias && !proteinas) {
+    alert('Ingresa al menos las calorías o proteínas');
+    return;
   }
 
-  function buscarLinea(patrones) {
-    for (let i = 0; i < lineas.length; i++) {
-      const l = lineas[i].toLowerCase().replace(/\s+/g, ' ');
-      for (const patron of patrones) {
-        if (patron.test(l)) {
-          // Intentar en la misma línea
-          let val = primerNumero(lineas[i]);
-          if (val !== null) return val;
-          // Si no hay número, buscar en siguiente línea
-          if (i + 1 < lineas.length) {
-            val = primerNumero(lineas[i + 1]);
-            if (val !== null) return val;
-          }
-        }
-      }
-    }
-    return 0;
-  }
+  cancelarFotoTabla();
+  mostrarConfirmacion({
+    nombre, calorias, proteinas, carbos, grasas, por100g: true
+  });
+}
 
-  return {
-    calorias: buscarLinea([
-      /energ[ií]a\s*\(kcal\)/,
-      /energ[ií]a/,
-      /kcal/
-    ]),
-    proteinas: buscarLinea([
-      /prote[ií]nas?\s*\(g\)/,
-      /prote[ií]nas?/
-    ]),
-    carbos: buscarLinea([
-      /h\s*?de\s*?c\s*?disp/,
-      /hde\s*?c/,
-      /hdec/,
-      /h\.\s*de\s*c/,
-      /hidratos\s*de\s*carbono/,
-      /carbohidratos?\s*disp/,
-      /carbohidratos?/
-    ]),
-    grasas: buscarLinea([
-      /grasa\s*total\s*\(g\)/,
-      /grasa\s*total/,
-      /grasas?\s*totales?/
-    ])
-  };
+function cancelarFotoTabla() {
+  document.getElementById('foto-preview-container').classList.add('oculto');
+  document.getElementById('input-tabla').value = '';
 }
 
 // ─── Recordatorio creatina ───────────────────────────────
