@@ -201,6 +201,7 @@ function mostrarTab(tab) {
   event.target.classList.add('activo');
   if (tab !== 'barras' && streamActivo) cerrarVisor();
   if (tab === 'metas') actualizarBarrasMetas();
+  if (tab === 'historial') renderHistorial();
 }
 
 // ─── Guardar y renderizar ────────────────────────────────
@@ -874,10 +875,84 @@ function cancelarFotoTabla() {
   document.getElementById('input-tabla').value = '';
 }
 
+// ─── Historial ───────────────────────────────────────────
+function cargarHistorial() {
+  const dias = [];
+  const hoyStr = hoy.toISOString().slice(0, 10);
+
+  for (let i = 1; i <= 30; i++) {
+    const fecha = new Date(hoy);
+    fecha.setDate(fecha.getDate() - i);
+    const clave = `comiapp-${fecha.toISOString().slice(0, 10)}`;
+    const data  = localStorage.getItem(clave);
+    if (data) {
+      const items = JSON.parse(data);
+      if (items.length > 0) {
+        dias.push({ fecha, clave, items });
+      }
+    }
+  }
+  return dias;
+}
+
+function renderHistorial() {
+  const lista = document.getElementById('historial-lista');
+  const dias  = cargarHistorial();
+
+  if (dias.length === 0) {
+    lista.innerHTML = '<p class="historial-vacio">Sin registros anteriores</p>';
+    return;
+  }
+
+  lista.innerHTML = dias.map((dia, idx) => {
+    const fechaStr = dia.fecha.toLocaleDateString('es-CL', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    const totalKcal  = dia.items.reduce((s, a) => s + (parseFloat(a.calorias)  || 0), 0);
+    const totalProt  = dia.items.reduce((s, a) => s + (parseFloat(a.proteinas) || 0), 0);
+    const totalCarb  = dia.items.reduce((s, a) => s + (parseFloat(a.carbos)    || 0), 0);
+    const totalGras  = dia.items.reduce((s, a) => s + (parseFloat(a.grasas)    || 0), 0);
+
+    const alimentos = dia.items.map(a => `
+      <div class="historial-alimento">
+        <span>${a.nombre}</span>
+        <span class="historial-alimento-kcal">${formatNum(a.calorias)} kcal</span>
+      </div>
+    `).join('');
+
+    return `
+      <div class="historial-dia">
+        <div class="historial-dia-header" onclick="toggleHistorialDia(${idx})">
+          <span class="historial-dia-fecha">${fechaStr}</span>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="historial-dia-kcal">${formatNum(totalKcal)} kcal</span>
+            <span class="historial-dia-flecha" id="flecha-${idx}">▼</span>
+          </div>
+        </div>
+        <div class="historial-dia-body" id="body-${idx}">
+          <div class="historial-macros">
+            <span>💪 P: ${formatNum(totalProt)}g</span>
+            <span>🌾 C: ${formatNum(totalCarb)}g</span>
+            <span>🥑 G: ${formatNum(totalGras)}g</span>
+          </div>
+          ${alimentos}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleHistorialDia(idx) {
+  const body   = document.getElementById(`body-${idx}`);
+  const flecha = document.getElementById(`flecha-${idx}`);
+  body.classList.toggle('visible');
+  flecha.classList.toggle('abierto');
+}
+
 // Iniciar al cargar
 mostrarHoraCreatina();
 pedirPermisoNotificaciones();
 iniciarVerificadorCreatina();
 
-// ─── Init ────────────────────────────────────────────────
+// ─── Init ───────────────────────────────────────────────
 renderLista();

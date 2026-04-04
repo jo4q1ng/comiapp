@@ -66,6 +66,7 @@
         <button class="tab" onclick="mostrarTab('barras')">📷 Cámara</button>
         <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
         <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
+        <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
     </div>
 
     <!-- Modal metas -->
@@ -85,7 +86,7 @@
             <button onclick="cerrarModalMetas()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
         </div>
     </div>
-    
+
     <!-- Tab: Buscar -->
     <section class="tab-content" id="tab-buscar">
       <div class="formulario">
@@ -236,6 +237,14 @@
     <section class="lista">
       <h2>Registro de hoy</h2>
       <ul id="lista-alimentos"></ul>
+    </section>
+
+    <!-- Tab: Historial -->
+    <section class="tab-content oculto" id="tab-historial">
+        <div class="formulario">
+            <h2>Historial</h2>
+            <div id="historial-lista"></div>
+        </div>
     </section>
     
     <p class="leyenda">P = Proteínas &nbsp;·&nbsp; C = Carbohidratos &nbsp;·&nbsp; G = Grasas</p>
