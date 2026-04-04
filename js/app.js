@@ -320,11 +320,19 @@ function extraerMacros(texto) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-  function extraerPrimerNumero(linea) {
-    const nums = linea.match(/\d+[,.]?\d*/g);
-    if (!nums) return null;
-    return parseFloat(nums[0].replace(',', '.'));
-  }
+    function extraerPrimerNumero(linea) {
+        // Buscar todos los números de la línea
+        const nums = linea.match(/\d+[,.]\d+|\d+/g);
+        if (!nums || nums.length === 0) return null;
+
+        // Si hay dos números, el primero es 100g y el segundo es por porción
+        // Preferir números con decimal (más precisos) sobre enteros
+        const conDecimal = nums.find(n => /[,.]/.test(n));
+        if (conDecimal) return parseFloat(conDecimal.replace(',', '.'));
+
+        // Si todos son enteros, tomar el primero (columna 100g)
+        return parseFloat(nums[0].replace(',', '.'));
+    }
 
   function buscarLinea(patrones) {
     for (const linea of lineas) {
