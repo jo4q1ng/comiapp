@@ -199,7 +199,8 @@ function mostrarTab(tab) {
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('activo'));
   document.getElementById('tab-' + tab).classList.remove('oculto');
   event.target.classList.add('activo');
-  if (tab !== 'barras' && escanerActivo) detenerEscaner();
+  if (tab !== 'barras' && streamActivo) cerrarVisor();
+  if (tab === 'metas') actualizarBarrasMetas();
 }
 
 // ─── Guardar y renderizar ────────────────────────────────
@@ -225,12 +226,12 @@ function cargarMetas() {
 }
 
 function actualizarBarrasMetas() {
-  const metas   = cargarMetas();
+  const metas = cargarMetas();
   const consumo = {
-    calorias:  alimentos.reduce((s, a) => s + a.calorias,  0),
-    proteinas: alimentos.reduce((s, a) => s + a.proteinas, 0),
-    carbos:    alimentos.reduce((s, a) => s + a.carbos,    0),
-    grasas:    alimentos.reduce((s, a) => s + a.grasas,    0)
+    calorias:  alimentos.reduce((s, a) => s + (parseFloat(a.calorias)  || 0), 0),
+    proteinas: alimentos.reduce((s, a) => s + (parseFloat(a.proteinas) || 0), 0),
+    carbos:    alimentos.reduce((s, a) => s + (parseFloat(a.carbos)    || 0), 0),
+    grasas:    alimentos.reduce((s, a) => s + (parseFloat(a.grasas)    || 0), 0)
   };
 
   const items = [
@@ -241,9 +242,9 @@ function actualizarBarrasMetas() {
   ];
 
   items.forEach(({ key, unidad, consumo, meta }) => {
-    const texto = document.getElementById(`meta-${key}-texto`);
-    const fill  = document.getElementById(`meta-${key}-fill`);
-    const pct   = meta > 0 ? Math.min((consumo / meta) * 100, 100) : 0;
+    const texto    = document.getElementById(`meta-${key}-texto`);
+    const fill     = document.getElementById(`meta-${key}-fill`);
+    const pct      = meta > 0 ? Math.min((consumo / meta) * 100, 100) : 0;
     const excedido = meta > 0 && consumo > meta;
 
     texto.textContent = meta > 0

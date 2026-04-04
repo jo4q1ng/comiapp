@@ -38,6 +38,7 @@
     </div>
 
   <main>
+
     <!-- Resumen del día -->
     <section class="resumen">
       <div class="macro">
@@ -59,49 +60,16 @@
     </section>
 
     <!-- Barra de progreso metas -->
-    <section class="metas-barras">
-        <div class="meta-barra-item">
-            <div class="meta-barra-header">
-            <span class="meta-barra-label">🔥 Calorías</span>
-            <span class="meta-barra-valor" id="meta-cal-texto">0 / 0 kcal</span>
-            </div>
-            <div class="meta-barra-track">
-            <div class="meta-barra-fill" id="meta-cal-fill"></div>
-            </div>
-        </div>
-        <div class="meta-barra-item">
-            <div class="meta-barra-header">
-            <span class="meta-barra-label">💪 Proteínas</span>
-            <span class="meta-barra-valor" id="meta-prot-texto">0 / 0g</span>
-            </div>
-            <div class="meta-barra-track">
-            <div class="meta-barra-fill prot" id="meta-prot-fill"></div>
-            </div>
-        </div>
-        <div class="meta-barra-item">
-            <div class="meta-barra-header">
-            <span class="meta-barra-label">🌾 Carbos</span>
-            <span class="meta-barra-valor" id="meta-carb-texto">0 / 0g</span>
-            </div>
-            <div class="meta-barra-track">
-            <div class="meta-barra-fill carb" id="meta-carb-fill"></div>
-            </div>
-        </div>
-        <div class="meta-barra-item">
-            <div class="meta-barra-header">
-            <span class="meta-barra-label">🥑 Grasas</span>
-            <span class="meta-barra-valor" id="meta-gras-texto">0 / 0g</span>
-            </div>
-            <div class="meta-barra-track">
-            <div class="meta-barra-fill gras" id="meta-gras-fill"></div>
-            </div>
-        </div>
 
-        <button class="btn-editar-metas" onclick="abrirModalMetas()">⚙️ Editar metas</button>
+    <div class="tabs">
+        <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
+        <button class="tab" onclick="mostrarTab('barras')">📷 Cámara</button>
+        <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
+        <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
+    </div>
 
-    </section>
+    <!-- Modal metas -->
 
-<!-- Modal metas -->
     <div id="modal-metas" class="modal-overlay oculto">
         <div class="modal-box">
             <p class="modal-titulo">⚙️ Meta diaria</p>
@@ -186,6 +154,57 @@
                 <input type="text" id="foto-nombre" placeholder="Nombre del producto (opcional)" />
                 <button onclick="confirmarFotoTabla()">+ Agregar</button>
                 <button onclick="cancelarFotoTabla()" class="btn-cancelar">Cancelar</button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Tab: Metas -->
+    <section class="tab-content oculto" id="tab-metas">
+        <div class="formulario">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+                <h2 style="margin:0">Progreso de hoy</h2>
+                <button class="btn-editar-metas" onclick="abrirModalMetas()">⚙️ Editar metas</button>
+            </div>
+
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                    <span class="meta-barra-label">🔥 Calorías</span>
+                    <span class="meta-barra-valor" id="meta-cal-texto">0 kcal</span>
+                </div>
+                <div class="meta-barra-track">
+                    <div class="meta-barra-fill cal" id="meta-cal-fill"></div>
+                </div>
+            </div>
+
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                    <span class="meta-barra-label">💪 Proteínas</span>
+                    <span class="meta-barra-valor" id="meta-prot-texto">0g</span>
+                </div>
+                <div class="meta-barra-track">
+                    <div class="meta-barra-fill prot" id="meta-prot-fill"></div>
+                </div>
+            </div>
+
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                    <span class="meta-barra-label">🌾 Carbohidratos</span>
+                    <span class="meta-barra-valor" id="meta-carb-texto">0g</span>
+                </div>
+                <div class="meta-barra-track">
+                    <div class="meta-barra-fill carb" id="meta-carb-fill"></div>
+                </div>
+            </div>
+
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                    <span class="meta-barra-label">🥑 Grasas</span>
+                    <span class="meta-barra-valor" id="meta-gras-texto">0g</span>
+                </div>
+                <div class="meta-barra-track">
+                    <div class="meta-barra-fill gras" id="meta-gras-fill"></div>
+                </div>
             </div>
 
         </div>
