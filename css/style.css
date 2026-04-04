@@ -293,3 +293,55 @@ input[type="time"] {
   display: block;
   margin: 0 auto;
 }
+
+.visor-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 0.75rem;
+}
+
+#visor-video {
+  width: 100%;
+  display: block;
+  max-height: 340px;
+  object-fit: cover;
+}
+
+.visor-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.visor-recuadro {
+  width: 80%;
+  height: 180px;
+  border: 2px solid #16a34a;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+}
+
+.visor-hint {
+  color: white;
+  font-size: 0.75rem;
+  margin-top: 0.75rem;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.btn-capturar {
+  background: #16a34a;
+  color: white;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  margin-bottom: 0.5rem;
+}

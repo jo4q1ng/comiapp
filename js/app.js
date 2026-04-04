@@ -2,6 +2,60 @@ function formatNum(n) {
   return Number(n).toFixed(1).replace('.', ',');
 }
 
+let streamActivo = null;
+
+async function abrirVisor() {
+  document.getElementById('visor-container').classList.remove('oculto');
+  document.getElementById('btn-abrir-visor').classList.add('oculto');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    streamActivo = stream;
+    document.getElementById('visor-video').srcObject = stream;
+  } catch {
+    document.getElementById('estado-escaner').textContent = 'No se pudo acceder a la cámara.';
+    cerrarVisor();
+  }
+}
+
+function capturarVisor() {
+  const video  = document.getElementById('visor-video');
+  const canvas = document.getElementById('canvas-captura');
+
+  // Calcular área del recuadro (80% ancho, 180px alto centrado)
+  const escala  = video.videoWidth / video.offsetWidth;
+  const recW    = video.offsetWidth * 0.80 * escala;
+  const recH    = 180 * escala;
+  const recX    = (video.videoWidth - recW) / 2;
+  const recY    = (video.videoHeight - recH) / 2;
+
+  canvas.width  = recW;
+  canvas.height = recH;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, recX, recY, recW, recH, 0, 0, recW, recH);
+
+  cerrarVisor();
+
+  // Mostrar preview recortado
+  document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
+  document.getElementById('foto-preview-container').classList.remove('oculto');
+
+  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function cerrarVisor() {
+  if (streamActivo) {
+    streamActivo.getTracks().forEach(t => t.stop());
+    streamActivo = null;
+  }
+  document.getElementById('visor-container').classList.add('oculto');
+  document.getElementById('btn-abrir-visor').classList.remove('oculto');
+}
+
 // Fecha de hoy
 const hoy = new Date();
 document.getElementById('fecha-hoy').textContent =
