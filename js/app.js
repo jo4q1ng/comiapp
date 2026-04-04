@@ -191,10 +191,11 @@ function seleccionarResultado(i) {
   const n = p.nutriments;
   mostrarConfirmacion({
     nombre: p.product_name,
-    calorias: Math.round(n['energy-kcal_100g'] || 0),
-    proteinas: Math.round(n['proteins_100g'] || 0),
-    carbos: Math.round(n['carbohydrates_100g'] || 0),
-    grasas: Math.round(n['fat_100g'] || 0)
+    calorias:  parseFloat((n['energy-kcal_100g']  || 0).toFixed(1)),
+    proteinas: parseFloat((n['proteins_100g']      || 0).toFixed(1)),
+    carbos:    parseFloat((n['carbohydrates_100g'] || 0).toFixed(1)),
+    grasas:    parseFloat((n['fat_100g']           || 0).toFixed(1)),
+    por100g: true
   });
 }
 
@@ -224,15 +225,17 @@ async function buscarPorBarras(codigo) {
 
     mostrarConfirmacion({
       nombre: p.product_name || 'Producto sin nombre',
-      calorias: Math.round(n['energy-kcal_100g'] || 0),
-      proteinas: Math.round(n['proteins_100g'] || 0),
-      carbos: Math.round(n['carbohydrates_100g'] || 0),
-      grasas: Math.round(n['fat_100g'] || 0)
+      calorias:  parseFloat((n['energy-kcal_100g'] || 0).toFixed(1)),
+      proteinas: parseFloat((n['proteins_100g']    || 0).toFixed(1)),
+      carbos:    parseFloat((n['carbohydrates_100g']|| 0).toFixed(1)),
+      grasas:    parseFloat((n['fat_100g']          || 0).toFixed(1)),
+      por100g: true
     });
   } catch {
     document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
   }
 }
+
 // ─── Ingreso manual ──────────────────────────────────────
 function agregarManual() {
   const nombre = document.getElementById('nombre').value.trim();
@@ -339,26 +342,22 @@ function extraerMacros(texto) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-    function extraerPrimerNumero(linea) {
-        // Buscar todos los números de la línea
-        const nums = linea.match(/\d+[,.]\d+|\d+/g);
-        if (!nums || nums.length === 0) return null;
-
-        // Si hay dos números, el primero es 100g y el segundo es por porción
-        // Preferir números con decimal (más precisos) sobre enteros
-        const conDecimal = nums.find(n => /[,.]/.test(n));
-        if (conDecimal) return parseFloat(conDecimal.replace(',', '.'));
-
-        // Si todos son enteros, tomar el primero (columna 100g)
-        return parseFloat(nums[0].replace(',', '.'));
-    }
+  function extraerNumero(linea) {
+    // Buscar número con decimal (coma o punto)
+    const conDecimal = linea.match(/\d+[,.]\d+/);
+    if (conDecimal) return parseFloat(conDecimal[0].replace(',', '.'));
+    // Si no hay decimal, buscar entero
+    const entero = linea.match(/\d+/);
+    if (entero) return parseFloat(entero[0]);
+    return null;
+  }
 
   function buscarLinea(patrones) {
     for (const linea of lineas) {
       const l = linea.toLowerCase();
       for (const patron of patrones) {
         if (patron.test(l)) {
-          const valor = extraerPrimerNumero(linea);
+          const valor = extraerNumero(linea);
           if (valor !== null) return valor;
         }
       }
@@ -366,40 +365,29 @@ function extraerMacros(texto) {
     return 0;
   }
 
-  const calorias = buscarLinea([
-    /energ[ií]a/,
-    /calor[ií]as?/,
-    /kcal/
-  ]);
-
-  const proteinas = buscarLinea([
-    /prote[ií]nas?\s*\(g\)/,
-    /prote[ií]nas?/,
-    /proteins?/
-  ]);
-
-  // En Chile se usa "H. de Carbono", "H de C disp.", "Carbohidratos"
-  const carbos = buscarLinea([
-    /h\.\s*de\s*c/,
-    /h\s*de\s*c\s*disp/,
-    /hidratos\s*de\s*carbono/,
-    /carbohidratos?\s*disp/,
-    /carbohidratos?/,
-    /carbohydrates?/,
-    /gl[úu]cidos/
-  ]);
-
-  // Grasa total primero, evitar confusión con grasas saturadas
-  const grasas = buscarLinea([
-    /grasa\s*total\s*\(g\)/,
-    /grasas?\s*totales?\s*\(g\)/,
-    /grasa\s*total/,
-    /grasas?\s*totales?/,
-    /l[ií]pidos?\s*totales?/,
-    /total\s*fat/
-  ]);
-
-  return { calorias, proteinas, carbos, grasas };
+  return {
+    calorias: buscarLinea([
+      /energ[ií]a\s*\(kcal\)/,
+      /energ[ií]a/,
+      /kcal/
+    ]),
+    proteinas: buscarLinea([
+      /prote[ií]nas?\s*\(g\)/,
+      /prote[ií]nas?/
+    ]),
+    carbos: buscarLinea([
+      /h\s*\.?\s*de\s*c\s*disp/,
+      /h\s*de\s*c/,
+      /carbohidratos?\s*disp/,
+      /hidratos\s*de\s*carbono/,
+      /carbohidratos?/
+    ]),
+    grasas: buscarLinea([
+      /grasa[s]?\s*total[es]?\s*\(g\)/,
+      /grasa[s]?\s*total/,
+      /grasas?\s*totales?/
+    ])
+  };
 }
 
 // ─── Recordatorio creatina ───────────────────────────────
