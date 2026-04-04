@@ -1248,9 +1248,84 @@ function renderProgreso() {
   });
 }
 
+// ─── Agua ────────────────────────────────────────────────
+function claveAgua() {
+  return `comiapp-agua-${hoy.toISOString().slice(0, 10)}`;
+}
+
+function cargarAgua() {
+  return parseInt(localStorage.getItem(claveAgua()) || '0');
+}
+
+function metaAgua() {
+  return parseInt(localStorage.getItem('comiapp-meta-agua') || '8');
+}
+
+function actualizarHeaderAgua() {
+  const vasos = cargarAgua();
+  const meta  = metaAgua();
+  document.getElementById('agua-header').textContent = `${vasos} / ${meta}`;
+}
+
+function abrirAgua() {
+  const modal = document.getElementById('modal-agua');
+  modal.classList.remove('oculto');
+  modal.style.display = 'flex';
+  document.getElementById('meta-agua-input').value = metaAgua();
+  renderVasos();
+}
+
+function cerrarAgua() {
+  const modal = document.getElementById('modal-agua');
+  modal.classList.add('oculto');
+  modal.style.display = 'none';
+}
+
+function renderVasos() {
+  const vasos   = cargarAgua();
+  const meta    = metaAgua();
+  const container = document.getElementById('agua-vasos');
+
+  container.innerHTML = Array.from({ length: meta }, (_, i) => `
+    <span class="agua-vaso ${i < vasos ? 'lleno' : ''}">💧</span>
+  `).join('');
+
+  const ml = vasos * 250;
+  document.getElementById('agua-meta-texto').textContent =
+    vasos >= meta
+      ? `✅ Meta cumplida · ${ml} ml tomados`
+      : `${ml} ml · Te faltan ${(meta - vasos) * 250} ml`;
+
+  actualizarHeaderAgua();
+}
+
+function agregarVaso() {
+  const vasos = cargarAgua();
+  const meta  = metaAgua();
+  if (vasos >= meta) { alert('¡Ya alcanzaste tu meta de agua! 💧'); return; }
+  localStorage.setItem(claveAgua(), vasos + 1);
+  renderVasos();
+}
+
+function quitarVaso() {
+  const vasos = cargarAgua();
+  if (vasos <= 0) return;
+  localStorage.setItem(claveAgua(), vasos - 1);
+  renderVasos();
+}
+
+function guardarMetaAgua() {
+  const meta = parseInt(document.getElementById('meta-agua-input').value);
+  if (!meta || meta < 1 || meta > 20) { alert('Ingresa una meta válida (1-20 vasos)'); return; }
+  localStorage.setItem('comiapp-meta-agua', meta);
+  renderVasos();
+}
+
 // ─── Init ───────────────────────────────────────────────
+// Init
 pedirPermisoNotificaciones();
 iniciarVerificadorCreatina();
 mostrarHoraCreatina();
 renderLista();
 actualizarBarrasMetas();
+actualizarHeaderAgua();

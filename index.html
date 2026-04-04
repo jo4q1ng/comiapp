@@ -19,11 +19,15 @@
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
                 <button class="btn-creatina" onclick="abrirConfigCreatina()" id="btn-creatina-header">
-                💊 Creatina
+                    💊 Creatina
                 </button>
                 <span id="hora-creatina-display" style="font-size:0.7rem;color:rgba(255,255,255,0.75);display:none"></span>
             </div>
-        </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <button class="btn-creatina" onclick="abrirAgua()">
+                    💧 <span id="agua-header">0 / 8</span>
+                </button>
+            </div>
     </header>
     
     <!-- Modal recordatorio creatina -->
@@ -35,6 +39,27 @@
             <button onclick="guardarRecordatorioCreatina()" style="margin-top:0.75rem">Guardar hora</button>
             <button onclick="cerrarModalCreatina()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
         </div>
+    </div>
+
+    <!-- Modal agua -->
+    <div id="modal-agua" class="modal-overlay oculto">
+    <div class="modal-box">
+        <p class="modal-titulo">💧 Registro de agua</p>
+        <div class="agua-vasos" id="agua-vasos"></div>
+        <p class="agua-meta-texto" id="agua-meta-texto"></p>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem">
+            <button onclick="agregarVaso()" style="flex:1">+ 1 vaso (250ml)</button>
+            <button onclick="quitarVaso()" class="btn-cancelar" style="flex:1;margin:0">- 1 vaso</button>
+        </div>
+        <div style="margin-top:0.75rem">
+            <label style="font-size:0.82rem;color:#374151;display:block;margin-bottom:0.25rem">Meta diaria (vasos)</label>
+            <div style="display:flex;gap:0.5rem">
+                <input type="number" id="meta-agua-input" placeholder="Ej: 8" style="flex:1;margin:0" />
+                <button onclick="guardarMetaAgua()" style="width:auto;padding:0.6rem 1rem;margin:0">OK</button>
+            </div>
+        </div>
+        <button onclick="cerrarAgua()" class="btn-cancelar" style="margin-top:0.75rem">Cerrar</button>
+    </div>
     </div>
 
   <main>

@@ -597,3 +597,29 @@ input[type="time"] {
   font-size: 0.82rem;
   color: #374151;
 }
+
+.agua-vasos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0.75rem 0;
+}
+
+.agua-vaso {
+  font-size: 1.6rem;
+  opacity: 0.25;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.agua-vaso.lleno {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.agua-meta-texto {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
