@@ -20,16 +20,17 @@ async function abrirVisor() {
   }
 }
 
-function capturarVisor() {
-  const video  = document.getElementById('visor-video');
-  const canvas = document.getElementById('canvas-captura');
+async function capturarVisor() {
+  const video   = document.getElementById('visor-video');
+  const canvas  = document.getElementById('canvas-captura');
+  const estado  = document.getElementById('estado-escaner');
 
-  // Calcular área del recuadro (80% ancho, 180px alto centrado)
-  const escala  = video.videoWidth / video.offsetWidth;
-  const recW    = video.offsetWidth * 0.80 * escala;
-  const recH    = 180 * escala;
-  const recX    = (video.videoWidth - recW) / 2;
-  const recY    = (video.videoHeight - recH) / 2;
+  // Calcular área exacta del recuadro (70% ancho, 420px alto, centrado)
+  const escala = video.videoWidth  / video.offsetWidth;
+  const recW   = video.offsetWidth * 0.70 * escala;
+  const recH   = 420 * escala;
+  const recX   = (video.videoWidth  - recW) / 2;
+  const recY   = (video.videoHeight - recH) / 2;
 
   canvas.width  = recW;
   canvas.height = recH;
@@ -37,14 +38,58 @@ function capturarVisor() {
   ctx.drawImage(video, recX, recY, recW, recH, 0, 0, recW, recH);
 
   cerrarVisor();
+  estado.textContent = '🔍 Leyendo tabla...';
 
-  // Mostrar preview recortado
-  document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
-  document.getElementById('foto-preview-container').classList.remove('oculto');
+  try {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
 
-  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+    const worker = await Tesseract.createWorker('spa+eng', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
+        }
+      }
+    });
+
+    const { data: { text } } = await worker.recognize(blob);
+    await worker.terminate();
+
+    console.log('Texto OCR:', text);
+
+    const macros = extraerMacros(text);
+    console.log('Macros:', macros);
+
+    if (!macros.calorias && !macros.proteinas && !macros.carbos && !macros.grasas) {
+      estado.textContent = '';
+      // Mostrar formulario guiado como respaldo
+      document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
+      document.getElementById('foto-preview-container').classList.remove('oculto');
+      ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      return;
+    }
+
+    // Si detectó valores, mostrar confirmación con los encontrados
+    // y dejar editables los que no se leyeron bien
+    estado.textContent = '';
+    document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
+    document.getElementById('foto-preview-container').classList.remove('oculto');
+
+    // Prerellenar campos con lo que se detectó
+    if (macros.calorias)  document.getElementById('foto-calorias').value  = macros.calorias;
+    if (macros.proteinas) document.getElementById('foto-proteinas').value = macros.proteinas;
+    if (macros.carbos)    document.getElementById('foto-carbos').value    = macros.carbos;
+    if (macros.grasas)    document.getElementById('foto-grasas').value    = macros.grasas;
+    document.getElementById('foto-nombre').value = '';
+
+  } catch (e) {
+    console.error('Error OCR:', e);
+    estado.textContent = '';
+    // Mostrar formulario guiado como respaldo
+    document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
+    document.getElementById('foto-preview-container').classList.remove('oculto');
+  }
 }
 
 function cerrarVisor() {

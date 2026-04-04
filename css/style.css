@@ -320,13 +320,12 @@ input[type="time"] {
 }
 
 .visor-recuadro {
-  width: 80%;
-  height: 180px;
+  width: 70%;
+  height: 420px;
   border: 2px solid #16a34a;
   border-radius: 8px;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
 }
-
 .visor-hint {
   color: white;
   font-size: 0.75rem;
