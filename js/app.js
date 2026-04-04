@@ -214,6 +214,73 @@ function actualizarResumen() {
   document.getElementById('total-grasas').textContent    = alimentos.reduce((s, a) => s + a.grasas, 0) + 'g';
 }
 
+// ─── Metas diarias ───────────────────────────────────────
+function cargarMetas() {
+  return {
+    calorias:  parseInt(localStorage.getItem('meta-calorias'))  || 0,
+    proteinas: parseInt(localStorage.getItem('meta-proteinas')) || 0,
+    carbos:    parseInt(localStorage.getItem('meta-carbos'))    || 0,
+    grasas:    parseInt(localStorage.getItem('meta-grasas'))    || 0
+  };
+}
+
+function actualizarBarrasMetas() {
+  const metas   = cargarMetas();
+  const consumo = {
+    calorias:  alimentos.reduce((s, a) => s + a.calorias,  0),
+    proteinas: alimentos.reduce((s, a) => s + a.proteinas, 0),
+    carbos:    alimentos.reduce((s, a) => s + a.carbos,    0),
+    grasas:    alimentos.reduce((s, a) => s + a.grasas,    0)
+  };
+
+  const items = [
+    { key: 'cal',  unidad: 'kcal', consumo: consumo.calorias,  meta: metas.calorias  },
+    { key: 'prot', unidad: 'g',    consumo: consumo.proteinas, meta: metas.proteinas },
+    { key: 'carb', unidad: 'g',    consumo: consumo.carbos,    meta: metas.carbos    },
+    { key: 'gras', unidad: 'g',    consumo: consumo.grasas,    meta: metas.grasas    }
+  ];
+
+  items.forEach(({ key, unidad, consumo, meta }) => {
+    const texto = document.getElementById(`meta-${key}-texto`);
+    const fill  = document.getElementById(`meta-${key}-fill`);
+    const pct   = meta > 0 ? Math.min((consumo / meta) * 100, 100) : 0;
+    const excedido = meta > 0 && consumo > meta;
+
+    texto.textContent = meta > 0
+      ? `${formatNum(consumo)} / ${meta} ${unidad}`
+      : `${formatNum(consumo)} ${unidad}`;
+
+    fill.style.width = pct + '%';
+    fill.classList.toggle('excedido', excedido);
+  });
+}
+
+function abrirModalMetas() {
+  const metas = cargarMetas();
+  document.getElementById('meta-cal-input').value  = metas.calorias  || '';
+  document.getElementById('meta-prot-input').value = metas.proteinas || '';
+  document.getElementById('meta-carb-input').value = metas.carbos    || '';
+  document.getElementById('meta-gras-input').value = metas.grasas    || '';
+  const modal = document.getElementById('modal-metas');
+  modal.classList.remove('oculto');
+  modal.style.display = 'flex';
+}
+
+function cerrarModalMetas() {
+  const modal = document.getElementById('modal-metas');
+  modal.classList.add('oculto');
+  modal.style.display = 'none';
+}
+
+function guardarMetas() {
+  localStorage.setItem('meta-calorias',  document.getElementById('meta-cal-input').value  || 0);
+  localStorage.setItem('meta-proteinas', document.getElementById('meta-prot-input').value || 0);
+  localStorage.setItem('meta-carbos',    document.getElementById('meta-carb-input').value || 0);
+  localStorage.setItem('meta-grasas',    document.getElementById('meta-gras-input').value || 0);
+  cerrarModalMetas();
+  actualizarBarrasMetas();
+}
+
 function renderLista() {
   const ul = document.getElementById('lista-alimentos');
   ul.innerHTML = alimentos.length === 0
@@ -232,6 +299,7 @@ function renderLista() {
     ul.appendChild(li);
   });
   actualizarResumen();
+  actualizarBarrasMetas();
 }
 
 function eliminar(i) {

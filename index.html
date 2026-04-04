@@ -58,6 +58,66 @@
       </div>
     </section>
 
+    <!-- Barra de progreso metas -->
+    <section class="metas-barras">
+        <div class="meta-barra-item">
+            <div class="meta-barra-header">
+            <span class="meta-barra-label">🔥 Calorías</span>
+            <span class="meta-barra-valor" id="meta-cal-texto">0 / 0 kcal</span>
+            </div>
+            <div class="meta-barra-track">
+            <div class="meta-barra-fill" id="meta-cal-fill"></div>
+            </div>
+        </div>
+        <div class="meta-barra-item">
+            <div class="meta-barra-header">
+            <span class="meta-barra-label">💪 Proteínas</span>
+            <span class="meta-barra-valor" id="meta-prot-texto">0 / 0g</span>
+            </div>
+            <div class="meta-barra-track">
+            <div class="meta-barra-fill prot" id="meta-prot-fill"></div>
+            </div>
+        </div>
+        <div class="meta-barra-item">
+            <div class="meta-barra-header">
+            <span class="meta-barra-label">🌾 Carbos</span>
+            <span class="meta-barra-valor" id="meta-carb-texto">0 / 0g</span>
+            </div>
+            <div class="meta-barra-track">
+            <div class="meta-barra-fill carb" id="meta-carb-fill"></div>
+            </div>
+        </div>
+        <div class="meta-barra-item">
+            <div class="meta-barra-header">
+            <span class="meta-barra-label">🥑 Grasas</span>
+            <span class="meta-barra-valor" id="meta-gras-texto">0 / 0g</span>
+            </div>
+            <div class="meta-barra-track">
+            <div class="meta-barra-fill gras" id="meta-gras-fill"></div>
+            </div>
+        </div>
+
+        <button class="btn-editar-metas" onclick="abrirModalMetas()">⚙️ Editar metas</button>
+
+    </section>
+
+<!-- Modal metas -->
+    <div id="modal-metas" class="modal-overlay oculto">
+        <div class="modal-box">
+            <p class="modal-titulo">⚙️ Meta diaria</p>
+            <label>🔥 Calorías (kcal)</label>
+            <input type="number" id="meta-cal-input" placeholder="Ej: 2000" />
+            <label>💪 Proteínas (g)</label>
+            <input type="number" id="meta-prot-input" placeholder="Ej: 150" />
+            <label>🌾 Carbohidratos (g)</label>
+            <input type="number" id="meta-carb-input" placeholder="Ej: 200" />
+            <label>🥑 Grasas (g)</label>
+            <input type="number" id="meta-gras-input" placeholder="Ej: 65" />
+            <button onclick="guardarMetas()" style="margin-top:0.75rem">Guardar</button>
+            <button onclick="cerrarModalMetas()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+        </div>
+    </div>
+
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
