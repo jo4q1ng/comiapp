@@ -1036,53 +1036,63 @@ function calcularIMC() {
   else if (imc < 30)   { categoria = 'Sobrepeso';   clase = 'sobrepeso'; }
   else                 { categoria = 'Obesidad';     clase = 'obesidad'; }
 
-  badge.textContent = categoria;
-  badge.className   = `imc-badge ${clase}`;
+  // Rango de peso saludable (IMC 18.5 - 24.9)
+  const pesoMinSano = (18.5 * estatura * estatura).toFixed(1);
+  const pesoMaxSano = (24.9 * estatura * estatura).toFixed(1);
 
-  resultado.innerHTML = `
-    <span class="imc-valor">${imc.toFixed(1)}</span>
-    <span>Peso: <strong>${formatNum(peso)} kg</strong> · Estatura: <strong>${formatNum(estatura)} m</strong></span><br>
-    <span>Categoría: <strong>${categoria}</strong></span>
-  `;
-}
+  // Peso ideal (IMC 22, punto medio del rango normal)
+  const pesoIdeal = (22 * estatura * estatura).toFixed(1);
 
-function calcularIMC() {
-  const estatura = parseFloat(localStorage.getItem('comiapp-estatura'));
-  const pesos    = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
-  const peso     = pesos.length > 0 ? pesos[pesos.length - 1].peso : null;
-
-  const badge     = document.getElementById('imc-display');
-  const resultado = document.getElementById('imc-resultado');
-
-  // Mostrar estatura guardada
-  const estaturaInput = document.getElementById('input-estatura');
-  if (estatura) estaturaInput.placeholder = `Actual: ${formatNum(estatura)} m`;
-
-  if (!estatura || !peso) {
-    resultado.innerHTML = estatura && !peso
-      ? '<p>Registra tu peso para calcular el IMC</p>'
-      : !estatura && peso
-      ? '<p>Ingresa tu estatura para calcular el IMC</p>'
-      : '<p>Ingresa tu peso y estatura para calcular el IMC</p>';
-    badge.textContent = '';
-    return;
+  // Cuánto subir o bajar
+  let recomendacion = '';
+  if (imc < 18.5) {
+    const diferencia = (pesoMinSano - peso).toFixed(1);
+    recomendacion = `
+      <div class="imc-recomendacion bajo">
+        <span class="rec-titulo">📈 Necesitas ganar peso</span>
+        <span class="rec-detalle">Te faltan <strong>${formatNum(diferencia)} kg</strong> para alcanzar el rango saludable</span>
+        <span class="rec-detalle">Peso objetivo: <strong>${formatNum(pesoMinSano)} – ${formatNum(pesoMaxSano)} kg</strong></span>
+      </div>
+    `;
+  } else if (imc < 25) {
+    recomendacion = `
+      <div class="imc-recomendacion normal">
+        <span class="rec-titulo">✅ Estás en tu peso ideal</span>
+        <span class="rec-detalle">Rango saludable: <strong>${formatNum(pesoMinSano)} – ${formatNum(pesoMaxSano)} kg</strong></span>
+        <span class="rec-detalle">Peso ideal estimado: <strong>${formatNum(pesoIdeal)} kg</strong></span>
+      </div>
+    `;
+  } else if (imc < 30) {
+    const diferencia = (peso - pesoMaxSano).toFixed(1);
+    recomendacion = `
+      <div class="imc-recomendacion sobrepeso">
+        <span class="rec-titulo">📉 Necesitas bajar peso</span>
+        <span class="rec-detalle">Te sobran <strong>${formatNum(diferencia)} kg</strong> para volver al rango saludable</span>
+        <span class="rec-detalle">Peso objetivo: <strong>${formatNum(pesoMinSano)} – ${formatNum(pesoMaxSano)} kg</strong></span>
+      </div>
+    `;
+  } else {
+    const diferencia = (peso - pesoMaxSano).toFixed(1);
+    recomendacion = `
+      <div class="imc-recomendacion obesidad">
+        <span class="rec-titulo">⚠️ Sobrepeso significativo</span>
+        <span class="rec-detalle">Te sobran <strong>${formatNum(diferencia)} kg</strong> para el rango saludable</span>
+        <span class="rec-detalle">Peso objetivo: <strong>${formatNum(pesoMinSano)} – ${formatNum(pesoMaxSano)} kg</strong></span>
+        <span class="rec-detalle">Consulta con un profesional de salud</span>
+      </div>
+    `;
   }
 
-  const imc = peso / (estatura * estatura);
-  let categoria, clase;
-
-  if      (imc < 18.5) { categoria = 'Bajo peso';    clase = 'bajo'; }
-  else if (imc < 25)   { categoria = 'Peso normal';   clase = 'normal'; }
-  else if (imc < 30)   { categoria = 'Sobrepeso';     clase = 'sobrepeso'; }
-  else                 { categoria = 'Obesidad';       clase = 'obesidad'; }
-
   badge.textContent = categoria;
   badge.className   = `imc-badge ${clase}`;
 
   resultado.innerHTML = `
     <span class="imc-valor">${imc.toFixed(1)}</span>
-    <span>Peso: <strong>${formatNum(peso)} kg</strong> · Estatura: <strong>${formatNum(estatura)} m</strong></span><br>
-    <span>Categoría: <strong>${categoria}</strong></span>
+    <div style="font-size:0.85rem;color:#6b7280;margin-bottom:0.75rem">
+      Peso actual: <strong>${formatNum(peso)} kg</strong> · 
+      Estatura: <strong>${formatNum(estatura)} m</strong>
+    </div>
+    ${recomendacion}
   `;
 }
 

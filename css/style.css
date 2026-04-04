@@ -572,3 +572,28 @@ input[type="time"] {
 .progreso-alimento:last-child { border-bottom: none; }
 .progreso-alimento-nombre { color: #374151; }
 .progreso-alimento-kcal { color: #16a34a; font-weight: 500; font-size: 0.82rem; }
+
+.imc-recomendacion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+}
+
+.imc-recomendacion.bajo      { background: #dbeafe; }
+.imc-recomendacion.normal    { background: #dcfce7; }
+.imc-recomendacion.sobrepeso { background: #fef9c3; }
+.imc-recomendacion.obesidad  { background: #fee2e2; }
+
+.rec-titulo {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #111;
+}
+
+.rec-detalle {
+  font-size: 0.82rem;
+  color: #374151;
+}
