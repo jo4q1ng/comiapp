@@ -200,11 +200,12 @@ function seleccionarResultado(i) {
 
 // ─── Sacar Foto al codigo de barras ─────────────────────────
 async function buscarManualBarras() {
-  const codigo = document.getElementById('input-barras').value.trim();
+  const input = document.getElementById('input-barras');
+  const codigo = input.value.trim();
   if (!codigo) { alert('Ingresa el código de barras'); return; }
   document.getElementById('estado-escaner').textContent = 'Buscando producto...';
   await buscarPorBarras(codigo);
-  document.getElementById('input-barras').value = '';
+  input.value = '';
 }
 
 async function buscarPorBarras(codigo) {
@@ -279,10 +280,28 @@ async function escanearTabla(input) {
   if (!archivo) return;
 
   const estado = document.getElementById('estado-escaner');
-  estado.textContent = '📷 Leyendo tabla nutricional...';
+  estado.textContent = '📷 Procesando imagen...';
 
   try {
-    const { data: { text } } = await Tesseract.recognize(archivo, 'spa+eng', {
+    // Cargar imagen en canvas y recortar solo mitad izquierda (columna 100g)
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(archivo);
+    });
+
+    const canvas = document.getElementById('canvas-barras');
+    // Solo tomar el 60% izquierdo de la imagen (donde está columna 100g)
+    canvas.width = Math.floor(img.width * 0.6);
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+    // Convertir canvas a blob para Tesseract
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+
+    const { data: { text } } = await Tesseract.recognize(blob, 'spa+eng', {
       logger: m => {
         if (m.status === 'recognizing text') {
           estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
@@ -308,7 +327,7 @@ async function escanearTabla(input) {
       por100g: true
     });
 
-  } catch {
+  } catch (e) {
     estado.textContent = 'Error al procesar la imagen. Intenta de nuevo.';
   }
 
