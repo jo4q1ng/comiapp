@@ -28,6 +28,7 @@
                     💧 <span id="agua-header">0 / 8</span>
                 </button>
             </div>
+        </div>
     </header>
     
     <!-- Modal recordatorio creatina -->
@@ -43,322 +44,224 @@
 
     <!-- Modal agua -->
     <div id="modal-agua" class="modal-overlay oculto">
-    <div class="modal-box">
-        <p class="modal-titulo">💧 Registro de agua</p>
-        <div class="agua-vasos" id="agua-vasos"></div>
-        <p class="agua-meta-texto" id="agua-meta-texto"></p>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem">
-            <button onclick="agregarVaso()" style="flex:1">+ 1 vaso (250ml)</button>
-            <button onclick="quitarVaso()" class="btn-cancelar" style="flex:1;margin:0">- 1 vaso</button>
-        </div>
-        <div style="margin-top:0.75rem">
-            <label style="font-size:0.82rem;color:#374151;display:block;margin-bottom:0.25rem">Meta diaria (vasos)</label>
-            <div style="display:flex;gap:0.5rem">
-                <input type="number" id="meta-agua-input" placeholder="Ej: 8" style="flex:1;margin:0" />
-                <button onclick="guardarMetaAgua()" style="width:auto;padding:0.6rem 1rem;margin:0">OK</button>
-            </div>
-        </div>
-        <button onclick="cerrarAgua()" class="btn-cancelar" style="margin-top:0.75rem">Cerrar</button>
-    </div>
-    </div>
-
-  <main>
-
-    <!-- Resumen del día -->
-    <section class="resumen">
-      <div class="macro">
-        <span class="valor" id="total-calorias">0</span>
-        <span class="label">kcal</span>
-      </div>
-      <div class="macro">
-        <span class="valor" id="total-proteinas">0g</span>
-        <span class="label">proteínas</span>
-      </div>
-      <div class="macro">
-        <span class="valor" id="total-carbos">0g</span>
-        <span class="label">carbos</span>
-      </div>
-      <div class="macro">
-        <span class="valor" id="total-grasas">0g</span>
-        <span class="label">grasas</span>
-      </div>
-    </section>
-
-    <!-- Barra de progreso metas -->
-
-    <div class="tabs">
-        <button class="tab activo" onclick="mostrarTab('buscar')">🔍 Buscar</button>
-        <button class="tab" onclick="mostrarTab('barras')">📷 Cámara</button>
-        <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
-        <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
-        <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
-        <button class="tab" onclick="mostrarTab('progreso')">📈 Progreso</button>
-        <button class="tab" onclick="mostrarTab('calculadora')">🧮 Calc.</button>
-        <button class="tab" onclick="mostrarTab('registro')">🍽️ Hoy</button>
-        <button class="tab" onclick="mostrarTab('bienestar')">📝 Bienestar</button>
-    </div>
-
-    <!-- Modal metas -->
-
-    <div id="modal-metas" class="modal-overlay oculto">
         <div class="modal-box">
-            <p class="modal-titulo">⚙️ Meta diaria</p>
-            <label>🔥 Calorías (kcal)</label>
-            <input type="number" id="meta-cal-input" placeholder="Ej: 2000" />
-            <label>💪 Proteínas (g)</label>
-            <input type="number" id="meta-prot-input" placeholder="Ej: 150" />
-            <label>🌾 Carbohidratos (g)</label>
-            <input type="number" id="meta-carb-input" placeholder="Ej: 200" />
-            <label>🥑 Grasas (g)</label>
-            <input type="number" id="meta-gras-input" placeholder="Ej: 65" />
-            <button onclick="guardarMetas()" style="margin-top:0.75rem">Guardar</button>
-            <button onclick="cerrarModalMetas()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+            <p class="modal-titulo">💧 Registro de agua</p>
+            <div class="agua-vasos" id="agua-vasos"></div>
+            <p class="agua-meta-texto" id="agua-meta-texto"></p>
+            <div style="display:flex;gap:0.5rem;margin-top:1rem">
+                <button onclick="agregarVaso()" style="flex:1">+ 1 vaso (250ml)</button>
+                <button onclick="quitarVaso()" class="btn-cancelar" style="flex:1;margin:0">- 1 vaso</button>
+            </div>
+            <div style="margin-top:0.75rem">
+                <label style="font-size:0.82rem;color:#374151;display:block;margin-bottom:0.25rem">Meta diaria (vasos)</label>
+                <div style="display:flex;gap:0.5rem">
+                    <input type="number" id="meta-agua-input" placeholder="Ej: 8" style="flex:1;margin:0" />
+                    <button onclick="guardarMetaAgua()" style="width:auto;padding:0.6rem 1rem;margin:0">OK</button>
+                </div>
+            </div>
+            <button onclick="cerrarAgua()" class="btn-cancelar" style="margin-top:0.75rem">Cerrar</button>
         </div>
     </div>
 
-    <!-- Tab: Buscar -->
-    <section class="tab-content" id="tab-buscar">
-      <div class="formulario">
-        <input type="text" id="buscador" placeholder="Ej: pollo, arroz, manzana..." oninput="buscarAlimento()" />
-        <div id="resultados-busqueda"></div>
-      </div>
-    </section>
+    <main>
+        <!-- Sección: Inicio -->
+        <div class="seccion" id="sec-inicio">
+            <section class="resumen-cards">
+            <div class="resumen-card cal">
+                <span class="rc-valor" id="total-calorias">0</span>
+                <span class="rc-label">kcal</span>
+            </div>
+            <div class="resumen-card prot">
+                <span class="rc-valor" id="total-proteinas">0g</span>
+                <span class="rc-label">proteínas</span>
+            </div>
+            <div class="resumen-card carb">
+                <span class="rc-valor" id="total-carbos">0g</span>
+                <span class="rc-label">carbos</span>
+            </div>
+            <div class="resumen-card gras">
+                <span class="rc-valor" id="total-grasas">0g</span>
+                <span class="rc-label">grasas</span>
+            </div>
+            </section>
 
-    <!-- Tab: Código de barras -->
-
-    <section class="tab-content oculto" id="tab-barras">
-        <div class="formulario">
-
-            <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
-            <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
-            <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
-            <p id="estado-escaner" class="estado-texto"></p>
-
-            <div class="separador">o</div>
-
-            <button onclick="abrirVisor()" id="btn-abrir-visor">📷 Escanear tabla nutricional</button>
-
-            <!-- Visor con recuadro -->
-            <div id="visor-container" class="oculto">
-                <div class="visor-wrapper">
-                    <video id="visor-video" autoplay playsinline muted></video>
-                    <div class="visor-overlay">
-                    <div class="visor-recuadro"></div>
-                    <p class="visor-hint">Enfoca la tabla nutricional dentro del recuadro</p>
-                    </div>
-                </div>
-                <button onclick="capturarVisor()" class="btn-capturar">📸 Capturar</button>
-                <button onclick="cerrarVisor()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+            <div class="acciones-rapidas">
+                <button class="accion-btn" onclick="irA('buscar')">🔍 Buscar</button>
+                <button class="accion-btn" onclick="irA('barras')">📷 Escanear</button>
+                <button class="accion-btn" onclick="irA('manual')">✏️ Manual</button>
             </div>
 
-            <canvas id="canvas-captura" style="display:none"></canvas>
-            <p id="estado-ocr" class="estado-texto"></p>
-
-            <!-- Campos editables tras escaneo -->
-            <div id="foto-preview-container" class="oculto">
-                <img id="foto-preview" style="width:100%;border-radius:8px;margin:0.75rem 0;max-height:200px;object-fit:cover" />
-                <p style="font-size:0.8rem;color:#374151;margin-bottom:0.75rem">Verifica y corrige si es necesario:</p>
-                <div class="campo-nutriente">
-                <label>🔥 Energía (kcal)</label>
-                <input type="text" inputmode="decimal" id="foto-calorias" placeholder="0" />
-                </div>
-                <div class="campo-nutriente">
-                <label>💪 Proteínas (g)</label>
-                <input type="text" inputmode="decimal" id="foto-proteinas" placeholder="0" />
-                </div>
-                <div class="campo-nutriente">
-                <label>🌾 H de C disp. (g)</label>
-                <input type="text" inputmode="decimal" id="foto-carbos" placeholder="0" />
-                </div>
-                <div class="campo-nutriente">
-                <label>🥑 Grasa total (g)</label>
-                <input type="text" inputmode="decimal" id="foto-grasas" placeholder="0" />
-                </div>
-                <input type="text" id="foto-nombre" placeholder="Nombre del producto (opcional)" />
-                <button onclick="confirmarFotoTabla()">+ Agregar</button>
-                <button onclick="cancelarFotoTabla()" class="btn-cancelar">Cancelar</button>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Tab: Metas -->
-    <section class="tab-content oculto" id="tab-metas">
-        <div class="formulario">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-                <h2 style="margin:0">Progreso de hoy</h2>
-                <button class="btn-editar-metas" onclick="abrirModalMetas()">⚙️ Editar metas</button>
-            </div>
-
-            <div class="meta-barra-item">
-                <div class="meta-barra-header">
-                    <span class="meta-barra-label">🔥 Calorías</span>
-                    <span class="meta-barra-valor" id="meta-cal-texto">0 kcal</span>
-                </div>
-                <div class="meta-barra-track">
-                    <div class="meta-barra-fill cal" id="meta-cal-fill"></div>
-                </div>
-            </div>
-
-            <div class="meta-barra-item">
-                <div class="meta-barra-header">
-                    <span class="meta-barra-label">💪 Proteínas</span>
-                    <span class="meta-barra-valor" id="meta-prot-texto">0g</span>
-                </div>
-                <div class="meta-barra-track">
-                    <div class="meta-barra-fill prot" id="meta-prot-fill"></div>
-                </div>
-            </div>
-
-            <div class="meta-barra-item">
-                <div class="meta-barra-header">
-                    <span class="meta-barra-label">🌾 Carbohidratos</span>
-                    <span class="meta-barra-valor" id="meta-carb-texto">0g</span>
-                </div>
-                <div class="meta-barra-track">
-                    <div class="meta-barra-fill carb" id="meta-carb-fill"></div>
-                </div>
-            </div>
-
-            <div class="meta-barra-item">
-                <div class="meta-barra-header">
-                    <span class="meta-barra-label">🥑 Grasas</span>
-                    <span class="meta-barra-valor" id="meta-gras-texto">0g</span>
-                </div>
-                <div class="meta-barra-track">
-                    <div class="meta-barra-fill gras" id="meta-gras-fill"></div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Tab: Manual -->
-    <section class="tab-content oculto" id="tab-manual">
-      <div class="formulario">
-        <input type="text" id="nombre" placeholder="Nombre del alimento" />
-        <input type="number" id="calorias" placeholder="Calorías (kcal)" />
-        <div class="fila-macros">
-          <input type="number" id="proteinas" placeholder="Proteínas (g)" />
-          <input type="number" id="carbos" placeholder="Carbos (g)" />
-          <input type="number" id="grasas" placeholder="Grasas (g)" />
-        </div>
-        <button onclick="agregarManual()">+ Agregar</button>
-      </div>
-    </section>
-
-    <!-- Confirmación de alimento encontrado -->
-    <section id="confirmar-panel" class="oculto formulario confirmacion">
-        <p class="confirmar-titulo">¿Agregar este alimento?</p>
-        <div id="confirmar-info"></div>
-        <div class="gramos-container" id="gramos-container">
-            <label style="font-size:0.85rem;color:#374151;margin-bottom:0.25rem;display:block">¿Cuántos gramos vas a comer?</label>
-            <input type="number" id="input-gramos" placeholder="Ej: 150" oninput="actualizarCalculo()" />
-            <div id="calculo-resultado" class="calculo-box"></div>
-        </div>
-
-        <label style="font-size:0.85rem;color:#374151;margin:0.5rem 0 0.25rem;display:block">¿En qué comida?</label>
-        
-        <div class="calc-opciones" style="grid-template-columns:repeat(4,1fr);margin-bottom:0.75rem">
-            <button class="calc-opcion activo" id="comida-btn-desayuno" onclick="seleccionarComida('desayuno')">🌅</button>
-            <button class="calc-opcion" id="comida-btn-almuerzo" onclick="seleccionarComida('almuerzo')">☀️</button>
-            <button class="calc-opcion" id="comida-btn-cena" onclick="seleccionarComida('cena')">🌙</button>
-            <button class="calc-opcion" id="comida-btn-snack" onclick="seleccionarComida('snack')">🍎</button>
-        </div>
-        <div class="fila-botones">
-            <button onclick="confirmarAlimento()">✓ Confirmar</button>
-            <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
-        </div>
-
-    </section>
-
-    <!-- Lista del día -->
-    <!-- Tab: Registro de hoy -->
-    <section class="tab-content oculto" id="tab-registro">
-
-        <div id="comidas-container">
-
-            <div class="comida-seccion" id="comida-desayuno">
-                <div class="comida-header" onclick="toggleComida('desayuno')">
+            <!-- Lista de hoy por comidas -->
+            <div id="comidas-container">
+                <div class="comida-seccion">
+                    <div class="comida-header" onclick="toggleComida('desayuno')">
                     <span>🌅 Desayuno</span>
                     <div style="display:flex;align-items:center;gap:0.5rem">
                         <span class="comida-kcal" id="kcal-desayuno">0 kcal</span>
                         <span class="comida-flecha" id="flecha-desayuno">▼</span>
                     </div>
-                </div>
-                <div class="comida-body" id="body-desayuno">
+                    </div>
+                    <div class="comida-body" id="body-desayuno">
                     <ul class="comida-lista" id="lista-desayuno"></ul>
+                    </div>
                 </div>
-            </div>
-
-            <div class="comida-seccion" id="comida-almuerzo">
-                <div class="comida-header" onclick="toggleComida('almuerzo')">
+                <div class="comida-seccion">
+                    <div class="comida-header" onclick="toggleComida('almuerzo')">
                     <span>☀️ Almuerzo</span>
                     <div style="display:flex;align-items:center;gap:0.5rem">
                         <span class="comida-kcal" id="kcal-almuerzo">0 kcal</span>
                         <span class="comida-flecha" id="flecha-almuerzo">▼</span>
                     </div>
-                </div>
-                <div class="comida-body" id="body-almuerzo">
+                    </div>
+                    <div class="comida-body" id="body-almuerzo">
                     <ul class="comida-lista" id="lista-almuerzo"></ul>
+                    </div>
                 </div>
-            </div>
-
-            <div class="comida-seccion" id="comida-cena">
-                <div class="comida-header" onclick="toggleComida('cena')">
+                <div class="comida-seccion">
+                    <div class="comida-header" onclick="toggleComida('cena')">
                     <span>🌙 Cena</span>
                     <div style="display:flex;align-items:center;gap:0.5rem">
                         <span class="comida-kcal" id="kcal-cena">0 kcal</span>
                         <span class="comida-flecha" id="flecha-cena">▼</span>
                     </div>
-                </div>
-                <div class="comida-body" id="body-cena">
+                    </div>
+                    <div class="comida-body" id="body-cena">
                     <ul class="comida-lista" id="lista-cena"></ul>
+                    </div>
                 </div>
-            </div>
-
-            <div class="comida-seccion" id="comida-snack">
-                <div class="comida-header" onclick="toggleComida('snack')">
+                <div class="comida-seccion">
+                    <div class="comida-header" onclick="toggleComida('snack')">
                     <span>🍎 Snack</span>
                     <div style="display:flex;align-items:center;gap:0.5rem">
                         <span class="comida-kcal" id="kcal-snack">0 kcal</span>
                         <span class="comida-flecha" id="flecha-snack">▼</span>
                     </div>
-                </div>
-                <div class="comida-body" id="body-snack">
+                    </div>
+                    <div class="comida-body" id="body-snack">
                     <ul class="comida-lista" id="lista-snack"></ul>
+                    </div>
                 </div>
             </div>
 
+            <p class="leyenda">P = Proteínas · C = Carbohidratos · G = Grasas</p>
+
         </div>
-    </section>
 
-    <!-- Tab: Historial -->
-    <section class="tab-content oculto" id="tab-historial">
-        <div class="formulario">
-            <h2>Historial</h2>
-            <div id="historial-lista"></div>
+        <!-- Sección: Registro (agregar alimentos) -->
+        <div class="seccion oculto" id="sec-registro">
+
+            <div class="sub-tabs">
+                <button class="sub-tab activo" onclick="mostrarTab('buscar', this)">🔍 Buscar</button>
+                <button class="sub-tab" onclick="mostrarTab('barras', this)">📷 Escanear</button>
+                <button class="sub-tab" onclick="mostrarTab('manual', this)">✏️ Manual</button>
+            </div>
+
+            <section class="tab-content" id="tab-buscar">
+            <div class="formulario">
+                <input type="text" id="buscador" placeholder="Ej: pollo, arroz, manzana..." oninput="buscarAlimento()" />
+                <div id="resultados-busqueda"></div>
+            </div>
+            </section>
+
+            <section class="tab-content oculto" id="tab-barras">
+            <div class="formulario">
+                <p class="estado-texto" style="margin-bottom:0.75rem">Ingresa el número bajo el código de barras</p>
+                <input type="number" id="input-barras" placeholder="Ej: 7802800012345" />
+                <button onclick="buscarManualBarras()">🔍 Buscar por código</button>
+                <p id="estado-escaner" class="estado-texto"></p>
+                <div class="separador">o</div>
+                <button onclick="abrirVisor()" id="btn-abrir-visor">📷 Escanear tabla nutricional</button>
+                <div id="visor-container" class="oculto">
+                    <div class="visor-wrapper">
+                        <video id="visor-video" autoplay playsinline muted></video>
+                        <div class="visor-overlay">
+                            <div class="visor-recuadro"></div>
+                            <p class="visor-hint">Enfoca la tabla nutricional dentro del recuadro</p>
+                        </div>
+                    </div>
+                    <button onclick="capturarVisor()" class="btn-capturar">📸 Capturar</button>
+                    <button onclick="cerrarVisor()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+                </div>
+                <canvas id="canvas-captura" style="display:none"></canvas>
+                <p id="estado-ocr" class="estado-texto"></p>
+                <div id="foto-preview-container" class="oculto">
+                    <img id="foto-preview" style="width:100%;border-radius:8px;margin:0.75rem 0;max-height:200px;object-fit:cover" />
+                    <p style="font-size:0.8rem;color:#374151;margin-bottom:0.75rem">Verifica y corrige si es necesario:</p>
+                    <div class="campo-nutriente">
+                        <label>🔥 Energía (kcal)</label>
+                        <input type="text" inputmode="decimal" id="foto-calorias" placeholder="0" />
+                    </div>
+                    <div class="campo-nutriente">
+                        <label>💪 Proteínas (g)</label>
+                        <input type="text" inputmode="decimal" id="foto-proteinas" placeholder="0" />
+                    </div>
+                    <div class="campo-nutriente">
+                        <label>🌾 H de C disp. (g)</label>
+                        <input type="text" inputmode="decimal" id="foto-carbos" placeholder="0" />
+                    </div>
+                    <div class="campo-nutriente">
+                        <label>🥑 Grasa total (g)</label>
+                        <input type="text" inputmode="decimal" id="foto-grasas" placeholder="0" />
+                    </div>
+                    <input type="text" id="foto-nombre" placeholder="Nombre del producto (opcional)" />
+                    <button onclick="confirmarFotoTabla()">+ Agregar</button>
+                    <button onclick="cancelarFotoTabla()" class="btn-cancelar">Cancelar</button>
+                </div>
+            </div>
+            </section>
+
+            <section class="tab-content oculto" id="tab-manual">
+            <div class="formulario">
+                <input type="text" id="nombre" placeholder="Nombre del alimento" />
+                <input type="number" id="calorias" placeholder="Calorías (kcal)" />
+                <div class="fila-macros">
+                    <input type="number" id="proteinas" placeholder="Proteínas (g)" />
+                    <input type="number" id="carbos" placeholder="Carbos (g)" />
+                    <input type="number" id="grasas" placeholder="Grasas (g)" />
+                </div>
+                <button onclick="agregarManual()">+ Agregar</button>
+            </div>
+            </section>
+
+            <!-- Confirmación -->
+            <section id="confirmar-panel" class="oculto formulario confirmacion">
+            <p class="confirmar-titulo">¿Agregar este alimento?</p>
+            <div id="confirmar-info"></div>
+            <div class="gramos-container" id="gramos-container">
+                <label style="font-size:0.85rem;color:#374151;margin-bottom:0.25rem;display:block">¿Cuántos gramos vas a comer?</label>
+                <input type="number" id="input-gramos" placeholder="Ej: 150" oninput="actualizarCalculo()" />
+                <div id="calculo-resultado" class="calculo-box"></div>
+            </div>
+            <label style="font-size:0.85rem;color:#374151;margin:0.5rem 0 0.25rem;display:block">¿En qué comida?</label>
+            <div class="calc-opciones" style="grid-template-columns:repeat(4,1fr);margin-bottom:0.75rem">
+                <button class="calc-opcion activo" id="comida-btn-desayuno" onclick="seleccionarComida('desayuno')">🌅</button>
+                <button class="calc-opcion" id="comida-btn-almuerzo" onclick="seleccionarComida('almuerzo')">☀️</button>
+                <button class="calc-opcion" id="comida-btn-cena" onclick="seleccionarComida('cena')">🌙</button>
+                <button class="calc-opcion" id="comida-btn-snack" onclick="seleccionarComida('snack')">🍎</button>
+            </div>
+            <div class="fila-botones">
+                <button onclick="confirmarAlimento()">✓ Confirmar</button>
+                <button onclick="cancelarConfirmacion()" class="btn-cancelar">Cancelar</button>
+            </div>
+            </section>
+
         </div>
-    </section>
 
-    <!-- Tab: Progreso -->
-    <section class="tab-content oculto" id="tab-progreso">
-
-        <!-- Peso corporal -->
-        <div class="formulario">
+        <!-- Sección: Progreso -->
+        <div class="seccion oculto" id="sec-progreso">
+            <div class="formulario">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
                 <h2 style="margin:0">⚖️ Peso corporal</h2>
-                <span id="peso-actual-display" style="font-size:1.1rem;font-weight:600;color:#16a34a"></span>
+                <span id="peso-actual-display" style="font-size:1.1rem;font-weight:600;color:var(--verde)"></span>
             </div>
             <div style="display:flex;gap:0.5rem">
                 <input type="text" inputmode="decimal" id="input-peso" placeholder="Ej: 75,5 kg" style="margin:0;flex:1" />
                 <button onclick="registrarPeso()" style="width:auto;padding:0.6rem 1rem;margin:0">Guardar</button>
             </div>
             <canvas id="grafico-peso" style="margin-top:1rem;width:100%;max-height:180px"></canvas>
-        </div>
+            </div>
 
-        <!-- Estatura e IMC -->
-        <div class="formulario">
+            <div class="formulario">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
                 <h2 style="margin:0">📏 Estatura e IMC</h2>
                 <span id="imc-display" class="imc-badge"></span>
@@ -367,122 +270,185 @@
                 <input type="text" inputmode="decimal" id="input-estatura" placeholder="Ej: 1,75 m" style="margin:0;flex:1" />
                 <button onclick="guardarEstatura()" style="width:auto;padding:0.6rem 1rem;margin:0">Guardar</button>
             </div>
-                <div id="imc-resultado" class="imc-resultado"></div>
-        </div>
+            <div id="imc-resultado" class="imc-resultado"></div>
+            </div>
 
-        <!-- Gráfico calorías semanales -->
-        <div class="formulario">
+            <div class="formulario">
             <h2>🔥 Calorías esta semana</h2>
             <canvas id="grafico-calorias" style="width:100%;max-height:180px"></canvas>
-        </div>
+            </div>
 
-        <!-- Gráfico macros semanales -->
-        <div class="formulario">
+            <div class="formulario">
             <h2>💪 Macros esta semana</h2>
             <canvas id="grafico-macros" style="width:100%;max-height:180px"></canvas>
+            </div>
         </div>
 
-    </section>
+        <!-- Sección: Metas -->
+        <div class="seccion oculto" id="sec-metas">
+            <div class="formulario">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+                <h2 style="margin:0">Progreso de hoy</h2>
+                <button class="btn-editar-metas" onclick="abrirModalMetas()">⚙️ Editar metas</button>
+            </div>
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                <span class="meta-barra-label">🔥 Calorías</span>
+                <span class="meta-barra-valor" id="meta-cal-texto">0 kcal</span>
+                </div>
+                <div class="meta-barra-track"><div class="meta-barra-fill cal" id="meta-cal-fill"></div></div>
+            </div>
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                <span class="meta-barra-label">💪 Proteínas</span>
+                <span class="meta-barra-valor" id="meta-prot-texto">0g</span>
+                </div>
+                <div class="meta-barra-track"><div class="meta-barra-fill prot" id="meta-prot-fill"></div></div>
+            </div>
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                <span class="meta-barra-label">🌾 Carbohidratos</span>
+                <span class="meta-barra-valor" id="meta-carb-texto">0g</span>
+                </div>
+                <div class="meta-barra-track"><div class="meta-barra-fill carb" id="meta-carb-fill"></div></div>
+            </div>
+            <div class="meta-barra-item">
+                <div class="meta-barra-header">
+                <span class="meta-barra-label">🥑 Grasas</span>
+                <span class="meta-barra-valor" id="meta-gras-texto">0g</span>
+                </div>
+                <div class="meta-barra-track"><div class="meta-barra-fill gras" id="meta-gras-fill"></div></div>
+            </div>
+            </div>
 
-    <!-- Tab: Calculadora -->
-    <section class="tab-content oculto" id="tab-calculadora">
-        <div class="formulario">
+            <div class="formulario">
             <h2>🧮 Calculadora de calorías</h2>
             <p class="estado-texto" style="margin-bottom:0.75rem">Basada en la fórmula Mifflin-St Jeor</p>
-
             <label class="calc-label">Sexo</label>
             <div class="calc-opciones">
                 <button class="calc-opcion activo" id="sexo-h" onclick="seleccionarSexo('h')">Hombre</button>
                 <button class="calc-opcion" id="sexo-m" onclick="seleccionarSexo('m')">Mujer</button>
             </div>
-
             <label class="calc-label">Edad (años)</label>
             <input type="number" id="calc-edad" placeholder="Ej: 25" />
-
             <label class="calc-label">Peso (kg)</label>
             <input type="number" step="0.1" id="calc-peso" placeholder="Ej: 75" />
-
             <label class="calc-label">Estatura (cm)</label>
             <input type="number" id="calc-estatura" placeholder="Ej: 175" />
-
             <label class="calc-label">Nivel de actividad</label>
             <select id="calc-actividad">
-                <option value="1.2">Sedentario (poco o nada de ejercicio)</option>
-                <option value="1.375">Ligero (ejercicio 1-3 días/semana)</option>
-                <option value="1.55" selected>Moderado (ejercicio 3-5 días/semana)</option>
-                <option value="1.725">Activo (ejercicio 6-7 días/semana)</option>
-                <option value="1.9">Muy activo (ejercicio intenso diario)</option>
+                <option value="1.2">Sedentario</option>
+                <option value="1.375">Ligero (1-3 días/semana)</option>
+                <option value="1.55" selected>Moderado (3-5 días/semana)</option>
+                <option value="1.725">Activo (6-7 días/semana)</option>
+                <option value="1.9">Muy activo</option>
             </select>
-
             <label class="calc-label">Objetivo</label>
             <div class="calc-opciones tres">
                 <button class="calc-opcion activo" id="obj-bajar" onclick="seleccionarObjetivo('bajar')">📉 Bajar</button>
                 <button class="calc-opcion" id="obj-mantener" onclick="seleccionarObjetivo('mantener')">⚖️ Mantener</button>
                 <button class="calc-opcion" id="obj-subir" onclick="seleccionarObjetivo('subir')">📈 Subir</button>
             </div>
-
             <button onclick="calcularCalorias()" style="margin-top:0.75rem">Calcular</button>
-        </div>
-
-        <!-- Resultado -->
-        <div class="formulario oculto" id="calc-resultado">
-            <h2>📊 Tu resultado</h2>
-            <div id="calc-resultado-contenido"></div>
-            <button onclick="aplicarMetasCalculadora()" style="margin-top:0.75rem">✅ Aplicar como mis metas</button>
-        </div>
-    </section>
-
-    <!-- Tab: Bienestar -->
-    <section class="tab-content oculto" id="tab-bienestar">
-
-        <div class="formulario">
-            <h2>📝 ¿Cómo estás hoy?</h2>
-
-            <!-- Sueño -->
-            <label class="calc-label">😴 Horas de sueño</label>
-            <div class="bienestar-slider-row">
-                <input type="range" id="sueno-slider" min="0" max="12" step="0.5" value="7" oninput="actualizarSlider('sueno')" />
-                <span class="bienestar-slider-val" id="sueno-val">7h</span>
+            <div class="oculto" id="calc-resultado">
+                <h2 style="margin-top:1rem">📊 Tu resultado</h2>
+                <div id="calc-resultado-contenido"></div>
+                <button onclick="aplicarMetasCalculadora()" style="margin-top:0.75rem">✅ Aplicar como mis metas</button>
             </div>
-
-            <!-- Energía -->
-            <label class="calc-label">⚡ Nivel de energía</label>
-            <div class="bienestar-emojis" id="energia-opciones">
-                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 1, this)">😴</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 2, this)">😕</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 3, this)">😐</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 4, this)">😊</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('energia', 5, this)">⚡</button>
             </div>
-
-            <!-- Estado de ánimo -->
-            <label class="calc-label">😊 Estado de ánimo</label>
-            <div class="bienestar-emojis" id="animo-opciones">
-                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 1, this)">😢</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 2, this)">😔</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 3, this)">😐</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 4, this)">😊</button>
-                <button class="emoji-btn" onclick="seleccionarEmoji('animo', 5, this)">😄</button>
-            </div>
-
-            <!-- Nota libre -->
-            <label class="calc-label">📓 Nota del día</label>
-            <textarea id="bienestar-nota" placeholder="¿Algo que quieras recordar de hoy?" rows="3"></textarea>
-
-            <button onclick="guardarBienestar()" style="margin-top:0.75rem">💾 Guardar</button>
         </div>
 
-        <!-- Historial bienestar -->
-        <div class="formulario">
-            <h2>📅 Últimos 7 días</h2>
-            <div id="bienestar-historial"></div>
+        <!-- Sección: Historial -->
+        <div class="seccion oculto" id="sec-historial">
+            <div class="formulario">
+                <h2>Historial</h2>
+                <div id="historial-lista"></div>
+            </div>
         </div>
 
-    </section>
+        <!-- Sección: Bienestar -->
+        <div class="seccion oculto" id="sec-bienestar">
+            <div class="formulario">
+                <h2>📝 ¿Cómo estás hoy?</h2>
+                <label class="calc-label">😴 Horas de sueño</label>
+                <div class="bienestar-slider-row">
+                    <input type="range" id="sueno-slider" min="0" max="12" step="0.5" value="7" oninput="actualizarSlider('sueno')" />
+                    <span class="bienestar-slider-val" id="sueno-val">7h</span>
+                </div>
+                <label class="calc-label">⚡ Nivel de energía</label>
+                <div class="bienestar-emojis" id="energia-opciones">
+                    <button class="emoji-btn" onclick="seleccionarEmoji('energia', 1, this)">😴</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('energia', 2, this)">😕</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('energia', 3, this)">😐</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('energia', 4, this)">😊</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('energia', 5, this)">⚡</button>
+                </div>
+                <label class="calc-label">😊 Estado de ánimo</label>
+                <div class="bienestar-emojis" id="animo-opciones">
+                    <button class="emoji-btn" onclick="seleccionarEmoji('animo', 1, this)">😢</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('animo', 2, this)">😔</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('animo', 3, this)">😐</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('animo', 4, this)">😊</button>
+                    <button class="emoji-btn" onclick="seleccionarEmoji('animo', 5, this)">😄</button>
+                </div>
+                <label class="calc-label">📓 Nota del día</label>
+                <textarea id="bienestar-nota" placeholder="¿Algo que quieras recordar de hoy?" rows="3"></textarea>
+                <button onclick="guardarBienestar()" style="margin-top:0.75rem">💾 Guardar</button>
+            </div>
+            <div class="formulario">
+                <h2>📅 Últimos 7 días</h2>
+                <div id="bienestar-historial"></div>
+            </div>
+        </div>
 
-    <p class="leyenda">P = Proteínas &nbsp;·&nbsp; C = Carbohidratos &nbsp;·&nbsp; G = Grasas</p>
+        <!-- Modales -->
+        <div id="modal-creatina" class="modal-overlay oculto">
+            <div class="modal-box">
+                <p class="modal-titulo">💊 Recordatorio de creatina</p>
+                <label style="font-size:0.85rem;color:#374151;display:block;margin-bottom:0.4rem">¿A qué hora quieres que te recuerde?</label>
+                <input type="time" id="hora-creatina" />
+                <button onclick="guardarRecordatorioCreatina()" style="margin-top:0.75rem">Guardar hora</button>
+                <button onclick="cerrarModalCreatina()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+            </div>
+        </div>
 
-  </main>
+        <div id="modal-metas" class="modal-overlay oculto">
+            <div class="modal-box">
+                <p class="modal-titulo">⚙️ Meta diaria</p>
+                <label>🔥 Calorías (kcal)</label>
+                <input type="number" id="meta-cal-input" placeholder="Ej: 2000" />
+                <label>💪 Proteínas (g)</label>
+                <input type="number" id="meta-prot-input" placeholder="Ej: 150" />
+                <label>🌾 Carbohidratos (g)</label>
+                <input type="number" id="meta-carb-input" placeholder="Ej: 200" />
+                <label>🥑 Grasas (g)</label>
+                <input type="number" id="meta-gras-input" placeholder="Ej: 65" />
+                <button onclick="guardarMetas()" style="margin-top:0.75rem">Guardar</button>
+                <button onclick="cerrarModalMetas()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+            </div>
+        </div>
+
+        <div id="modal-agua" class="modal-overlay oculto">
+            <div class="modal-box">
+                <p class="modal-titulo">💧 Registro de agua</p>
+                <div class="agua-vasos" id="agua-vasos"></div>
+                <p class="agua-meta-texto" id="agua-meta-texto"></p>
+                <div style="display:flex;gap:0.5rem;margin-top:1rem">
+                    <button onclick="agregarVaso()" style="flex:1">+ 1 vaso</button>
+                    <button onclick="quitarVaso()" class="btn-cancelar" style="flex:1;margin:0">- 1 vaso</button>
+                </div>
+                <div style="margin-top:0.75rem">
+                    <label style="font-size:0.82rem;color:#374151;display:block;margin-bottom:0.25rem">Meta diaria (vasos)</label>
+                    <div style="display:flex;gap:0.5rem">
+                    <input type="number" id="meta-agua-input" placeholder="Ej: 8" style="flex:1;margin:0" />
+                    <button onclick="guardarMetaAgua()" style="width:auto;padding:0.6rem 1rem;margin:0">OK</button>
+                    </div>
+                </div>
+                <button onclick="cerrarAgua()" class="btn-cancelar" style="margin-top:0.75rem">Cerrar</button>
+            </div>
+        </div>
+
+    </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.9.15/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@undecaf/barcode-detector-polyfill@0.9.21/dist/index.js"></script>
@@ -490,5 +456,46 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="js/app.js"></script>
   <script src="sw-register.js"></script>
+
+    <!-- Barra de progreso metas -->
+
+    <nav class="nav-bottom">
+        <button class="nav-btn activo" onclick="mostrarSeccion('inicio')" id="nav-inicio">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Inicio</span>
+        </button>
+        <button class="nav-btn" onclick="mostrarSeccion('registro')" id="nav-registro">
+            <span class="nav-icon">🍽️</span>
+            <span class="nav-label">Registro</span>
+        </button>
+        <button class="nav-btn" onclick="mostrarSeccion('progreso')" id="nav-progreso">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">Progreso</span>
+        </button>
+        <button class="nav-btn" onclick="mostrarSeccion('metas')" id="nav-metas">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-label">Metas</span>
+        </button>
+        <button class="nav-btn" onclick="mostrarSeccion('mas')" id="nav-mas">
+            <span class="nav-icon">···</span>
+            <span class="nav-label">Más</span>
+        </button>
+    </nav>
+
+    <!-- Menú "Más" -->
+    <div id="menu-mas" class="menu-mas oculto">
+        <div class="menu-mas-overlay" onclick="cerrarMenuMas()"></div>
+        <div class="menu-mas-box">
+            <p class="menu-mas-titulo">Más opciones</p>
+            <button class="menu-mas-item" onclick="irA('buscar')">🔍 Buscar alimento</button>
+            <button class="menu-mas-item" onclick="irA('barras')">📷 Escanear tabla</button>
+            <button class="menu-mas-item" onclick="irA('manual')">✏️ Ingreso manual</button>
+            <button class="menu-mas-item" onclick="irA('historial')">📅 Historial</button>
+            <button class="menu-mas-item" onclick="irA('calculadora')">🧮 Calculadora</button>
+            <button class="menu-mas-item" onclick="irA('bienestar')">📝 Bienestar</button>
+            <button class="menu-mas-item" onclick="cerrarMenuMas()">✕ Cerrar</button>
+        </div>
+    </div>
+
 </body>
 </html>

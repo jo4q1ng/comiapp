@@ -194,19 +194,47 @@ let escaner = null;
 let escanerActivo = false;
 let busquedaTimeout = null;
 
-// ─── Tabs ────────────────────────────────────────────────
-function mostrarTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('oculto'));
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('activo'));
-  document.getElementById('tab-' + tab).classList.remove('oculto');
-  event.target.classList.add('activo');
-  if (tab !== 'barras' && streamActivo) cerrarVisor();
-  if (tab === 'metas')      actualizarBarrasMetas();
-  if (tab === 'historial')  renderHistorial();
-  if (tab === 'progreso')   renderProgreso();
-  if (tab === 'registro')   renderComidas();
-  if (tab === 'bienestar')  { renderBienestarHistorial(); cargarBienestarHoy(); }
+// ─── Navegación ──────────────────────────────────────────
+function mostrarSeccion(seccion) {
+  document.querySelectorAll('.seccion').forEach(s => s.classList.add('oculto'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
+
+  if (seccion === 'mas') {
+    const menu = document.getElementById('menu-mas');
+    menu.classList.remove('oculto');
+    menu.style.display = 'flex';
+    return;
+  }
+
+  document.getElementById(`sec-${seccion}`).classList.remove('oculto');
+  document.getElementById(`nav-${seccion}`).classList.add('activo');
+
+  if (seccion === 'metas')    actualizarBarrasMetas();
+  if (seccion === 'progreso') renderProgreso();
+  if (seccion === 'historial') renderHistorial();
+  if (seccion === 'bienestar') { renderBienestarHistorial(); cargarBienestarHoy(); }
 }
+
+function cerrarMenuMas() {
+  const menu = document.getElementById('menu-mas');
+  menu.classList.add('oculto');
+  menu.style.display = 'none';
+}
+
+function irA(tab) {
+  cerrarMenuMas();
+  mostrarSeccion('registro');
+  mostrarTab(tab, document.querySelector(`.sub-tab[onclick="mostrarTab('${tab}', this)"]`));
+}
+
+function mostrarTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('oculto'));
+  document.querySelectorAll('.sub-tab').forEach(el => el.classList.remove('activo'));
+  document.getElementById(`tab-${tab}`).classList.remove('oculto');
+  if (btn) btn.classList.add('activo');
+  if (tab !== 'barras' && streamActivo) cerrarVisor();
+}
+
 // ─── Guardar y renderizar ────────────────────────────────
 function guardar() {
   localStorage.setItem(claveHoy, JSON.stringify(alimentos));
