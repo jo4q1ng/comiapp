@@ -996,10 +996,54 @@ function obtenerDatosSemana() {
 // ─── Estatura e IMC ──────────────────────────────────────
 function guardarEstatura() {
   const val = parseFloat(document.getElementById('input-estatura').value.replace(',', '.'));
-  if (!val || val < 0.5 || val > 2.5) { alert('Ingresa una estatura válida en metros (ej: 1,75)'); return; }
+  if (!val || val < 0.5 || val > 2.5) {
+    alert('Ingresa una estatura válida en metros (ej: 1,75)');
+    return;
+  }
   localStorage.setItem('comiapp-estatura', val);
   document.getElementById('input-estatura').value = '';
   calcularIMC();
+}
+
+function calcularIMC() {
+  const estatura = parseFloat(localStorage.getItem('comiapp-estatura'));
+  const pesos    = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+  const peso     = pesos.length > 0 ? pesos[pesos.length - 1].peso : null;
+
+  const badge     = document.getElementById('imc-display');
+  const resultado = document.getElementById('imc-resultado');
+
+  if (estatura) {
+    document.getElementById('input-estatura').placeholder = `Actual: ${formatNum(estatura)} m`;
+  }
+
+  if (!estatura || !peso) {
+    resultado.innerHTML = !estatura && !peso
+      ? '<p>Ingresa tu peso y estatura para calcular el IMC</p>'
+      : !peso
+      ? '<p>Registra tu peso para calcular el IMC</p>'
+      : '<p>Ingresa tu estatura para calcular el IMC</p>';
+    badge.textContent = '';
+    badge.className   = 'imc-badge';
+    return;
+  }
+
+  const imc = peso / (estatura * estatura);
+  let categoria, clase;
+
+  if      (imc < 18.5) { categoria = 'Bajo peso';  clase = 'bajo'; }
+  else if (imc < 25)   { categoria = 'Peso normal'; clase = 'normal'; }
+  else if (imc < 30)   { categoria = 'Sobrepeso';   clase = 'sobrepeso'; }
+  else                 { categoria = 'Obesidad';     clase = 'obesidad'; }
+
+  badge.textContent = categoria;
+  badge.className   = `imc-badge ${clase}`;
+
+  resultado.innerHTML = `
+    <span class="imc-valor">${imc.toFixed(1)}</span>
+    <span>Peso: <strong>${formatNum(peso)} kg</strong> · Estatura: <strong>${formatNum(estatura)} m</strong></span><br>
+    <span>Categoría: <strong>${categoria}</strong></span>
+  `;
 }
 
 function calcularIMC() {
