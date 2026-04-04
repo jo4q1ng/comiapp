@@ -7,48 +7,79 @@ let streamActivo = null;
 async function abrirVisor() {
   document.getElementById('visor-container').classList.remove('oculto');
   document.getElementById('btn-abrir-visor').classList.add('oculto');
+  document.getElementById('foto-preview-container').classList.add('oculto');
+  document.getElementById('estado-ocr').textContent = '';
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      video: {
+        facingMode: 'environment',
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
     });
     streamActivo = stream;
     document.getElementById('visor-video').srcObject = stream;
   } catch {
-    document.getElementById('estado-escaner').textContent = 'No se pudo acceder a la cámara.';
+    document.getElementById('estado-ocr').textContent = 'No se pudo acceder a la cámara.';
     cerrarVisor();
   }
 }
 
 async function capturarVisor() {
-  const video   = document.getElementById('visor-video');
-  const canvas  = document.getElementById('canvas-captura');
-  const estado  = document.getElementById('estado-escaner');
+  const video  = document.getElementById('visor-video');
+  const canvas = document.getElementById('canvas-captura');
+  const estado = document.getElementById('estado-ocr');
 
-  // Calcular área exacta del recuadro (70% ancho, 420px alto, centrado)
-  const escala = video.videoWidth  / video.offsetWidth;
-  const recW   = video.offsetWidth * 0.70 * escala;
-  const recH   = 420 * escala;
-  const recX   = (video.videoWidth  - recW) / 2;
-  const recY   = (video.videoHeight - recH) / 2;
+  // Coordenadas exactas del recuadro (65% ancho, 380px alto, centrado)
+  const scaleX = video.videoWidth  / video.offsetWidth;
+  const scaleY = video.videoHeight / video.offsetHeight;
+
+  const recW = video.offsetWidth  * 0.65 * scaleX;
+  const recH = 380 * scaleY;
+  const recX = (video.videoWidth  - recW) / 2;
+  const recY = (video.videoHeight - recH) / 2;
 
   canvas.width  = recW;
   canvas.height = recH;
+
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, recX, recY, recW, recH, 0, 0, recW, recH);
 
   cerrarVisor();
-  estado.textContent = '🔍 Leyendo tabla...';
+  estado.textContent = '🔍 Procesando...';
+
+  // Mostrar preview
+  document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
+  document.getElementById('foto-preview-container').classList.remove('oculto');
+  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
 
   try {
+    // Preprocesar: escala de grises + contraste
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const avg = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+      const c   = avg > 128 ? Math.min(255, avg * 1.4) : Math.max(0, avg * 0.6);
+      d[i] = d[i+1] = d[i+2] = c;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
 
-    const worker = await Tesseract.createWorker('spa+eng', 1, {
+    const worker = await Tesseract.createWorker('spa', 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
-          estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
+          estado.textContent = `Leyendo... ${Math.round(m.progress * 100)}%`;
         }
       }
+    });
+
+    await worker.setParameters({
+      tessedit_char_whitelist: 'abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789.,() ',
+      preserve_interword_spaces: '1'
     });
 
     const { data: { text } } = await worker.recognize(blob);
@@ -59,36 +90,19 @@ async function capturarVisor() {
     const macros = extraerMacros(text);
     console.log('Macros:', macros);
 
-    if (!macros.calorias && !macros.proteinas && !macros.carbos && !macros.grasas) {
-      estado.textContent = '';
-      // Mostrar formulario guiado como respaldo
-      document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
-      document.getElementById('foto-preview-container').classList.remove('oculto');
-      ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-      return;
-    }
-
-    // Si detectó valores, mostrar confirmación con los encontrados
-    // y dejar editables los que no se leyeron bien
-    estado.textContent = '';
-    document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
-    document.getElementById('foto-preview-container').classList.remove('oculto');
-
-    // Prerellenar campos con lo que se detectó
     if (macros.calorias)  document.getElementById('foto-calorias').value  = macros.calorias;
     if (macros.proteinas) document.getElementById('foto-proteinas').value = macros.proteinas;
     if (macros.carbos)    document.getElementById('foto-carbos').value    = macros.carbos;
     if (macros.grasas)    document.getElementById('foto-grasas').value    = macros.grasas;
-    document.getElementById('foto-nombre').value = '';
+
+    const n = [macros.calorias, macros.proteinas, macros.carbos, macros.grasas].filter(v => v > 0).length;
+    estado.textContent = n > 0
+      ? `✅ ${n} de 4 valores detectados. Verifica antes de agregar.`
+      : '⚠️ No se detectaron valores. Ingrésalos manualmente.';
 
   } catch (e) {
     console.error('Error OCR:', e);
-    estado.textContent = '';
-    // Mostrar formulario guiado como respaldo
-    document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
-    document.getElementById('foto-preview-container').classList.remove('oculto');
+    estado.textContent = '⚠️ Error al leer. Ingresa manualmente.';
   }
 }
 
@@ -101,6 +115,67 @@ function cerrarVisor() {
   document.getElementById('btn-abrir-visor').classList.remove('oculto');
 }
 
+function extraerMacros(texto) {
+  const lineas = texto.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
+
+  function primerNumero(linea) {
+    const nums = linea.match(/\d+[,.]\d+|\d+/g);
+    if (!nums) return null;
+    for (const n of nums) {
+      const val = parseFloat(n.replace(',', '.'));
+      if (val > 0 && val < 5000) return val;
+    }
+    return null;
+  }
+
+  function buscarLinea(patrones) {
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i].toLowerCase().replace(/\s+/g, ' ');
+      for (const patron of patrones) {
+        if (patron.test(l)) {
+          let val = primerNumero(lineas[i]);
+          if (val !== null) return val;
+          if (i + 1 < lineas.length) {
+            val = primerNumero(lineas[i + 1]);
+            if (val !== null) return val;
+          }
+        }
+      }
+    }
+    return 0;
+  }
+
+  return {
+    calorias: buscarLinea([/energ[ií]a\s*\(kcal\)/, /energ[ií]a/, /kcal/]),
+    proteinas: buscarLinea([/prote[ií]nas?\s*\(g\)/, /prote[ií]nas?/]),
+    carbos: buscarLinea([/h\s*\.?\s*de\s*c\s*disp/, /hde\s*c/, /hdec/, /hidratos\s*de\s*carbono/, /carbohidratos?/]),
+    grasas: buscarLinea([/grasa\s*total\s*\(g\)/, /grasa\s*total/, /grasas?\s*totales?/])
+  };
+}
+
+function confirmarFotoTabla() {
+  const calorias  = parseFloat(document.getElementById('foto-calorias').value)  || 0;
+  const proteinas = parseFloat(document.getElementById('foto-proteinas').value) || 0;
+  const carbos    = parseFloat(document.getElementById('foto-carbos').value)    || 0;
+  const grasas    = parseFloat(document.getElementById('foto-grasas').value)    || 0;
+  const nombre    = document.getElementById('foto-nombre').value.trim() || 'Producto escaneado';
+
+  if (!calorias && !proteinas && !carbos && !grasas) {
+    alert('Ingresa al menos un valor nutricional');
+    return;
+  }
+
+  cancelarFotoTabla();
+  mostrarConfirmacion({ nombre, calorias, proteinas, carbos, grasas, por100g: true });
+}
+
+function cancelarFotoTabla() {
+  document.getElementById('foto-preview-container').classList.add('oculto');
+  document.getElementById('foto-preview').src = '';
+  document.getElementById('estado-ocr').textContent = '';
+}
 // Fecha de hoy
 const hoy = new Date();
 document.getElementById('fecha-hoy').textContent =

@@ -301,18 +301,22 @@ input[type="time"] {
   overflow: hidden;
   background: #000;
   margin-bottom: 0.75rem;
+  height: 480px;
 }
 
 #visor-video {
   width: 100%;
+  height: 100%;
   display: block;
-  max-height: 340px;
   object-fit: cover;
 }
 
 .visor-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -320,18 +324,20 @@ input[type="time"] {
 }
 
 .visor-recuadro {
-  width: 70%;
-  height: 420px;
-  border: 2px solid #16a34a;
+  width: 65%;
+  height: 380px;
+  border: 2.5px solid #16a34a;
   border-radius: 8px;
   box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
 }
+
 .visor-hint {
   color: white;
   font-size: 0.75rem;
   margin-top: 0.75rem;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  padding: 0 1rem;
 }
 
 .btn-capturar {
@@ -343,8 +349,8 @@ input[type="time"] {
   font-size: 1rem;
   border: none;
   margin-bottom: 0.5rem;
+  cursor: pointer;
 }
-
 .campo-nutriente {
   display: flex;
   align-items: center;

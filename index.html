@@ -85,11 +85,25 @@
 
             <div class="separador">o</div>
 
-            <p class="estado-texto" style="margin-bottom:0.75rem">Fotografía solo la tabla nutricional, columna 100g</p>
-            <label class="btn-foto" for="input-tabla">📷 Escanear tabla nutricional</label>
-            <input type="file" id="input-tabla" accept="image/*" capture="environment" onchange="escanearTabla(this)" style="display:none" />
+            <button onclick="abrirVisor()" id="btn-abrir-visor">📷 Escanear tabla nutricional</button>
+
+            <!-- Visor con recuadro -->
+            <div id="visor-container" class="oculto">
+                <div class="visor-wrapper">
+                    <video id="visor-video" autoplay playsinline muted></video>
+                    <div class="visor-overlay">
+                    <div class="visor-recuadro"></div>
+                    <p class="visor-hint">Enfoca la tabla nutricional dentro del recuadro</p>
+                    </div>
+                </div>
+                <button onclick="capturarVisor()" class="btn-capturar">📸 Capturar</button>
+                <button onclick="cerrarVisor()" class="btn-cancelar" style="margin-top:0.5rem">Cancelar</button>
+            </div>
+
+            <canvas id="canvas-captura" style="display:none"></canvas>
             <p id="estado-ocr" class="estado-texto"></p>
 
+            <!-- Campos editables tras escaneo -->
             <div id="foto-preview-container" class="oculto">
                 <img id="foto-preview" style="width:100%;border-radius:8px;margin:0.75rem 0;max-height:200px;object-fit:cover" />
                 <p style="font-size:0.8rem;color:#374151;margin-bottom:0.75rem">Verifica y corrige si es necesario:</p>
