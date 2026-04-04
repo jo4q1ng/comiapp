@@ -1,5 +1,6 @@
 function formatNum(n) {
-  return Number(n).toFixed(1).replace('.', ',');
+  const val = parseFloat(n) || 0;
+  return val % 1 === 0 ? val.toString() : val.toFixed(1).replace('.', ',');
 }
 
 let streamActivo = null;
@@ -200,8 +201,9 @@ function mostrarTab(tab) {
   document.getElementById('tab-' + tab).classList.remove('oculto');
   event.target.classList.add('activo');
   if (tab !== 'barras' && streamActivo) cerrarVisor();
-  if (tab === 'metas') actualizarBarrasMetas();
-  if (tab === 'historial') renderHistorial();
+  if (tab === 'metas')      actualizarBarrasMetas();
+  if (tab === 'historial')  renderHistorial();
+  if (tab === 'favoritos')  renderFavoritos();
 }
 
 // ─── Guardar y renderizar ────────────────────────────────
@@ -210,10 +212,11 @@ function guardar() {
 }
 
 function actualizarResumen() {
-  document.getElementById('total-calorias').textContent  = alimentos.reduce((s, a) => s + a.calorias, 0);
-  document.getElementById('total-proteinas').textContent = alimentos.reduce((s, a) => s + a.proteinas, 0) + 'g';
-  document.getElementById('total-carbos').textContent    = alimentos.reduce((s, a) => s + a.carbos, 0) + 'g';
-  document.getElementById('total-grasas').textContent    = alimentos.reduce((s, a) => s + a.grasas, 0) + 'g';
+  const sumar = key => alimentos.reduce((s, a) => s + (parseFloat(a[key]) || 0), 0);
+  document.getElementById('total-calorias').textContent  = formatNum(sumar('calorias'));
+  document.getElementById('total-proteinas').textContent = formatNum(sumar('proteinas')) + 'g';
+  document.getElementById('total-carbos').textContent    = formatNum(sumar('carbos')) + 'g';
+  document.getElementById('total-grasas').textContent    = formatNum(sumar('grasas')) + 'g';
 }
 
 // ─── Metas diarias ───────────────────────────────────────
@@ -296,6 +299,7 @@ function renderLista() {
         <span class="li-macros">P: ${formatNum(a.proteinas)}g · C: ${formatNum(a.carbos)}g · G: ${formatNum(a.grasas)}g</span>
       </div>
       <span class="li-kcal">${formatNum(a.calorias)} kcal</span>
+      <button class="btn-fav" onclick="guardarComoFavorito(${i})" title="Guardar favorito">⭐</button>
       <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
     `;
     ul.appendChild(li);
@@ -947,6 +951,71 @@ function toggleHistorialDia(idx) {
   const flecha = document.getElementById(`flecha-${idx}`);
   body.classList.toggle('visible');
   flecha.classList.toggle('abierto');
+}
+
+// ─── Favoritos ───────────────────────────────────────────
+function cargarFavoritos() {
+  return JSON.parse(localStorage.getItem('comiapp-favoritos') || '[]');
+}
+
+function guardarFavoritos(favs) {
+  localStorage.setItem('comiapp-favoritos', JSON.stringify(favs));
+}
+
+function renderFavoritos() {
+  const lista = document.getElementById('favoritos-lista');
+  const favs  = cargarFavoritos();
+
+  if (favs.length === 0) {
+    lista.innerHTML = '<p class="favoritos-vacio">Sin favoritos aún. Agrega alimentos desde el registro y guárdalos como favorito ⭐</p>';
+    return;
+  }
+
+  lista.innerHTML = favs.map((f, i) => `
+    <div class="favorito-item">
+      <div class="favorito-info">
+        <span class="favorito-nombre">${f.nombre}</span>
+        <span class="favorito-macros">${formatNum(f.calorias)} kcal · P:${formatNum(f.proteinas)}g C:${formatNum(f.carbos)}g G:${formatNum(f.grasas)}g · por 100g</span>
+      </div>
+      <div class="favorito-acciones">
+        <button class="btn-fav-agregar" onclick="agregarDesdeFavorito(${i})">+ Agregar</button>
+        <button class="btn-fav-eliminar" onclick="eliminarFavorito(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function agregarDesdeFavorito(i) {
+  const favs = cargarFavoritos();
+  const f    = favs[i];
+  mostrarConfirmacion({ ...f, por100g: true });
+}
+
+function eliminarFavorito(i) {
+  const favs = cargarFavoritos();
+  favs.splice(i, 1);
+  guardarFavoritos(favs);
+  renderFavoritos();
+}
+
+function guardarComoFavorito(i) {
+  const a    = alimentos[i];
+  const favs = cargarFavoritos();
+  // Evitar duplicados por nombre
+  if (favs.find(f => f.nombre === a.nombre)) {
+    alert('Este alimento ya está en favoritos');
+    return;
+  }
+  // Guardar valores base por 100g si tiene gramos en el nombre
+  favs.push({
+    nombre:    a.nombre.replace(/\s*\(\d+g\)/, ''),
+    calorias:  parseFloat(a.calorias)  || 0,
+    proteinas: parseFloat(a.proteinas) || 0,
+    carbos:    parseFloat(a.carbos)    || 0,
+    grasas:    parseFloat(a.grasas)    || 0
+  });
+  guardarFavoritos(favs);
+  alert('✅ Guardado en favoritos');
 }
 
 // Iniciar al cargar

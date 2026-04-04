@@ -67,6 +67,7 @@
         <button class="tab" onclick="mostrarTab('manual')">✏️ Manual</button>
         <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
         <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
+        <button class="tab" onclick="mostrarTab('favoritos')">⭐ Favoritos</button>
     </div>
 
     <!-- Modal metas -->
@@ -244,6 +245,15 @@
         <div class="formulario">
             <h2>Historial</h2>
             <div id="historial-lista"></div>
+        </div>
+    </section>
+
+    <!-- Tab: Favoritos -->
+    <section class="tab-content oculto" id="tab-favoritos">
+        <div class="formulario">
+            <h2>Alimentos favoritos</h2>
+            <p class="estado-texto" style="margin-bottom:0.75rem">Guarda alimentos frecuentes para agregarlos rápido</p>
+            <div id="favoritos-lista"></div>
         </div>
     </section>
     
