@@ -288,24 +288,9 @@ function guardarMetas() {
 }
 
 function renderLista() {
-  const ul = document.getElementById('lista-alimentos');
-  ul.innerHTML = alimentos.length === 0
-    ? '<p class="cargando">Sin registros hoy</p>'
-    : '';
-  alimentos.forEach((a, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <div class="li-info">
-        <span class="li-nombre">${a.nombre}</span>
-        <span class="li-macros">P: ${formatNum(a.proteinas)}g · C: ${formatNum(a.carbos)}g · G: ${formatNum(a.grasas)}g</span>
-      </div>
-      <span class="li-kcal">${formatNum(a.calorias)} kcal</span>
-      <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
-    `;
-    ul.appendChild(li);
-  });  
-  actualizarBarrasMetas();
   actualizarResumen();
+  actualizarBarrasMetas();
+  renderComidas();
 }
 
 function eliminar(i) {
