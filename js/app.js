@@ -201,9 +201,9 @@ function mostrarTab(tab) {
   document.getElementById('tab-' + tab).classList.remove('oculto');
   event.target.classList.add('activo');
   if (tab !== 'barras' && streamActivo) cerrarVisor();
-  if (tab === 'metas')     actualizarBarrasMetas();
-  if (tab === 'historial') renderHistorial();
-  if (tab === 'progreso')  renderProgreso();
+  if (tab === 'metas')        actualizarBarrasMetas();
+  if (tab === 'historial')    renderHistorial();
+  if (tab === 'progreso')     renderProgreso();
 }
 // ─── Guardar y renderizar ────────────────────────────────
 function guardar() {
@@ -1320,6 +1320,115 @@ function guardarMetaAgua() {
   localStorage.setItem('comiapp-meta-agua', meta);
   renderVasos();
 }
+
+// ─── Calculadora ─────────────────────────────────────────
+let sexoSeleccionado    = 'h';
+let objetivoSeleccionado = 'bajar';
+let resultadoCalc       = null;
+
+function seleccionarSexo(sexo) {
+  sexoSeleccionado = sexo;
+  document.getElementById('sexo-h').classList.toggle('activo', sexo === 'h');
+  document.getElementById('sexo-m').classList.toggle('activo', sexo === 'm');
+}
+
+function seleccionarObjetivo(obj) {
+  objetivoSeleccionado = obj;
+  ['bajar', 'mantener', 'subir'].forEach(o => {
+    document.getElementById(`obj-${o}`).classList.toggle('activo', o === obj);
+  });
+}
+
+function calcularCalorias() {
+  const edad      = parseInt(document.getElementById('calc-edad').value);
+  const peso      = parseFloat(document.getElementById('calc-peso').value);
+  const estatura  = parseFloat(document.getElementById('calc-estatura').value);
+  const actividad = parseFloat(document.getElementById('calc-actividad').value);
+
+  if (!edad || !peso || !estatura) {
+    alert('Completa todos los campos');
+    return;
+  }
+
+  // Fórmula Mifflin-St Jeor
+  let tmb;
+  if (sexoSeleccionado === 'h') {
+    tmb = 10 * peso + 6.25 * estatura - 5 * edad + 5;
+  } else {
+    tmb = 10 * peso + 6.25 * estatura - 5 * edad - 161;
+  }
+
+  const tdee = Math.round(tmb * actividad);
+
+  let calObjetivo, etiqueta, descripcion;
+  if (objetivoSeleccionado === 'bajar') {
+    calObjetivo = Math.round(tdee - 500);
+    etiqueta    = '📉 Déficit calórico';
+    descripcion = 'Aprox. 0,5 kg menos por semana';
+  } else if (objetivoSeleccionado === 'mantener') {
+    calObjetivo = tdee;
+    etiqueta    = '⚖️ Mantenimiento';
+    descripcion = 'Mantén tu peso actual';
+  } else {
+    calObjetivo = Math.round(tdee + 500);
+    etiqueta    = '📈 Superávit calórico';
+    descripcion = 'Aprox. 0,5 kg más por semana';
+  }
+
+  // Distribución de macros recomendada
+  const prot = Math.round((calObjetivo * 0.30) / 4);
+  const carb = Math.round((calObjetivo * 0.40) / 4);
+  const gras = Math.round((calObjetivo * 0.30) / 9);
+
+  resultadoCalc = { calorias: calObjetivo, proteinas: prot, carbos: carb, grasas: gras };
+
+  document.getElementById('calc-resultado-contenido').innerHTML = `
+    <div class="calc-resultado-item">
+      <span class="calc-resultado-label">🔥 Metabolismo basal (TMB)</span>
+      <span class="calc-resultado-valor">${Math.round(tmb)} kcal</span>
+    </div>
+    <div class="calc-resultado-item">
+      <span class="calc-resultado-label">⚡ Gasto total diario (TDEE)</span>
+      <span class="calc-resultado-valor">${tdee} kcal</span>
+    </div>
+    <div class="calc-resultado-item destacado">
+      <div>
+        <div class="calc-resultado-label" style="font-weight:600">${etiqueta}</div>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:2px">${descripcion}</div>
+      </div>
+      <span class="calc-resultado-valor">${calObjetivo} kcal</span>
+    </div>
+    <p style="font-size:0.82rem;color:#6b7280;margin:0.5rem 0">Distribución de macros recomendada:</p>
+    <div class="calc-macros-grid">
+      <div class="calc-macro-box prot">
+        <span class="valor">${prot}g</span>
+        <span class="label">Proteínas</span>
+      </div>
+      <div class="calc-macro-box carb">
+        <span class="valor">${carb}g</span>
+        <span class="label">Carbos</span>
+      </div>
+      <div class="calc-macro-box gras">
+        <span class="valor">${gras}g</span>
+        <span class="label">Grasas</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('calc-resultado').classList.remove('oculto');
+  document.getElementById('calc-resultado').scrollIntoView({ behavior: 'smooth' });
+}
+
+function aplicarMetasCalculadora() {
+  if (!resultadoCalc) return;
+  localStorage.setItem('meta-calorias',  resultadoCalc.calorias);
+  localStorage.setItem('meta-proteinas', resultadoCalc.proteinas);
+  localStorage.setItem('meta-carbos',    resultadoCalc.carbos);
+  localStorage.setItem('meta-grasas',    resultadoCalc.grasas);
+  actualizarBarrasMetas();
+  alert('✅ Metas aplicadas correctamente');
+}
+
 
 // ─── Init ───────────────────────────────────────────────
 // Init

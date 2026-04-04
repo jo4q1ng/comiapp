@@ -623,3 +623,91 @@ input[type="time"] {
   color: #6b7280;
   margin-top: 0.25rem;
 }
+
+.calc-label {
+  display: block;
+  font-size: 0.82rem;
+  color: #374151;
+  margin-bottom: 0.25rem;
+  margin-top: 0.75rem;
+  font-weight: 500;
+}
+
+select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+  background: white;
+  color: #111;
+}
+
+.calc-opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.calc-opciones.tres {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.calc-opcion {
+  padding: 0.6rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin: 0;
+  width: 100%;
+}
+
+.calc-opcion.activo {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #16a34a;
+}
+
+.calc-resultado-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  background: #f9fafb;
+}
+
+.calc-resultado-item.destacado {
+  background: #dcfce7;
+  border: 1px solid #16a34a;
+}
+
+.calc-resultado-label { font-size: 0.85rem; color: #374151; }
+.calc-resultado-valor { font-weight: 700; font-size: 1rem; color: #16a34a; }
+
+.calc-macros-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.calc-macro-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.calc-macro-box .valor { font-size: 1.1rem; font-weight: 700; }
+.calc-macro-box .label { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+.calc-macro-box.prot .valor { color: #3b82f6; }
+.calc-macro-box.carb .valor { color: #f59e0b; }
+.calc-macro-box.gras .valor { color: #ef4444; }

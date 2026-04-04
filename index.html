@@ -93,6 +93,7 @@
         <button class="tab" onclick="mostrarTab('metas')">📊 Metas</button>
         <button class="tab" onclick="mostrarTab('historial')">📅 Historial</button>
         <button class="tab" onclick="mostrarTab('progreso')">📈 Progreso</button>
+        <button class="tab" onclick="mostrarTab('calculadora')">🧮 Calc.</button>
     </div>
 
     <!-- Modal metas -->
@@ -314,6 +315,54 @@
             <canvas id="grafico-macros" style="width:100%;max-height:180px"></canvas>
         </div>
 
+    </section>
+
+    <!-- Tab: Calculadora -->
+    <section class="tab-content oculto" id="tab-calculadora">
+        <div class="formulario">
+            <h2>🧮 Calculadora de calorías</h2>
+            <p class="estado-texto" style="margin-bottom:0.75rem">Basada en la fórmula Mifflin-St Jeor</p>
+
+            <label class="calc-label">Sexo</label>
+            <div class="calc-opciones">
+                <button class="calc-opcion activo" id="sexo-h" onclick="seleccionarSexo('h')">Hombre</button>
+                <button class="calc-opcion" id="sexo-m" onclick="seleccionarSexo('m')">Mujer</button>
+            </div>
+
+            <label class="calc-label">Edad (años)</label>
+            <input type="number" id="calc-edad" placeholder="Ej: 25" />
+
+            <label class="calc-label">Peso (kg)</label>
+            <input type="number" step="0.1" id="calc-peso" placeholder="Ej: 75" />
+
+            <label class="calc-label">Estatura (cm)</label>
+            <input type="number" id="calc-estatura" placeholder="Ej: 175" />
+
+            <label class="calc-label">Nivel de actividad</label>
+            <select id="calc-actividad">
+                <option value="1.2">Sedentario (poco o nada de ejercicio)</option>
+                <option value="1.375">Ligero (ejercicio 1-3 días/semana)</option>
+                <option value="1.55" selected>Moderado (ejercicio 3-5 días/semana)</option>
+                <option value="1.725">Activo (ejercicio 6-7 días/semana)</option>
+                <option value="1.9">Muy activo (ejercicio intenso diario)</option>
+            </select>
+
+            <label class="calc-label">Objetivo</label>
+            <div class="calc-opciones tres">
+                <button class="calc-opcion activo" id="obj-bajar" onclick="seleccionarObjetivo('bajar')">📉 Bajar</button>
+                <button class="calc-opcion" id="obj-mantener" onclick="seleccionarObjetivo('mantener')">⚖️ Mantener</button>
+                <button class="calc-opcion" id="obj-subir" onclick="seleccionarObjetivo('subir')">📈 Subir</button>
+            </div>
+
+            <button onclick="calcularCalorias()" style="margin-top:0.75rem">Calcular</button>
+        </div>
+
+        <!-- Resultado -->
+        <div class="formulario oculto" id="calc-resultado">
+            <h2>📊 Tu resultado</h2>
+            <div id="calc-resultado-contenido"></div>
+            <button onclick="aplicarMetasCalculadora()" style="margin-top:0.75rem">✅ Aplicar como mis metas</button>
+        </div>
     </section>
 
     <p class="leyenda">P = Proteínas &nbsp;·&nbsp; C = Carbohidratos &nbsp;·&nbsp; G = Grasas</p>
