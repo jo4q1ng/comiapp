@@ -410,10 +410,10 @@ input[type="time"] {
   transition: width 0.5s ease;
 }
 
-.meta-barra-fill.cal  { background: #16a34a; }
-.meta-barra-fill.prot { background: #3b82f6; }
-.meta-barra-fill.carb { background: #f59e0b; }
-.meta-barra-fill.gras { background: #ef4444; }
+.meta-barra-fill.cal  { background: #16a34a !important; }
+.meta-barra-fill.prot { background: #3b82f6 !important; }
+.meta-barra-fill.carb { background: #f59e0b !important; }
+.meta-barra-fill.gras { background: #ef4444 !important; }
 .meta-barra-fill.excedido { background: #dc2626 !important; }
 
 .btn-editar-metas {
