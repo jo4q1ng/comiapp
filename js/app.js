@@ -353,6 +353,94 @@ function agregarManual() {
   });
 }
 
+async function escanearTabla(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
+
+  const estado = document.getElementById('estado-ocr');
+  estado.textContent = '🔍 Procesando imagen...';
+
+  // Mostrar preview inmediatamente
+  document.getElementById('foto-preview').src = URL.createObjectURL(archivo);
+  document.getElementById('foto-preview-container').classList.remove('oculto');
+  ['foto-calorias','foto-proteinas','foto-carbos','foto-grasas','foto-nombre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  try {
+    // Preprocesar imagen: escala de grises y aumento contraste
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(archivo);
+    });
+
+    const canvas = document.createElement('canvas');
+    // Escalar imagen para mejor OCR (máximo 1200px de ancho)
+    const maxW = 1200;
+    const scale = img.width > maxW ? maxW / img.width : 1;
+    canvas.width  = img.width  * scale;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Aumentar contraste para mejorar OCR
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      // Escala de grises
+      const avg = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      // Aumentar contraste
+      const contraste = avg > 128 ? Math.min(255, avg * 1.3) : Math.max(0, avg * 0.7);
+      data[i] = data[i+1] = data[i+2] = contraste;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+
+    const worker = await Tesseract.createWorker('spa', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          estado.textContent = `Leyendo... ${Math.round(m.progress * 100)}%`;
+        }
+      }
+    });
+
+    // Configurar Tesseract para tablas numéricas
+    await worker.setParameters({
+      tessedit_char_whitelist: 'abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789.,()/ ',
+      preserve_interword_spaces: '1'
+    });
+
+    const { data: { text } } = await worker.recognize(blob);
+    await worker.terminate();
+
+    console.log('Texto OCR:', text);
+
+    const macros = extraerMacros(text);
+    console.log('Macros extraídos:', macros);
+
+    // Prerellenar campos con lo detectado
+    if (macros.calorias)  document.getElementById('foto-calorias').value  = macros.calorias;
+    if (macros.proteinas) document.getElementById('foto-proteinas').value = macros.proteinas;
+    if (macros.carbos)    document.getElementById('foto-carbos').value    = macros.carbos;
+    if (macros.grasas)    document.getElementById('foto-grasas').value    = macros.grasas;
+
+    const detectados = [macros.calorias, macros.proteinas, macros.carbos, macros.grasas].filter(v => v > 0).length;
+    estado.textContent = detectados > 0
+      ? `✅ ${detectados} de 4 valores detectados. Verifica y corrige si es necesario.`
+      : '⚠️ No se detectaron valores. Ingrésalos manualmente.';
+
+  } catch (e) {
+    console.error('Error OCR:', e);
+    estado.textContent = '⚠️ Error al leer. Ingresa los valores manualmente.';
+  }
+
+  input.value = '';
+}
+
 async function escanearFoto(input) {
   const archivo = input.files[0];
   if (!archivo) return;
