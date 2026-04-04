@@ -289,7 +289,7 @@ async function escanearTabla(input) {
   estado.textContent = '📷 Procesando imagen...';
 
   try {
-    const { data: { text } } = await Tesseract.recognize(archivo, 'spa+eng', {
+    const worker = await Tesseract.createWorker('spa+eng', 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
           estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
@@ -297,7 +297,13 @@ async function escanearTabla(input) {
       }
     });
 
+    const { data: { text } } = await worker.recognize(archivo);
+    await worker.terminate();
+
+    console.log('Texto detectado:', text);
+
     const macros = extraerMacros(text);
+    console.log('Macros extraídos:', macros);
 
     if (!macros.calorias && !macros.proteinas) {
       estado.textContent = 'No se pudieron leer los valores. Intenta con mejor iluminación o ingresa manualmente.';
@@ -307,15 +313,16 @@ async function escanearTabla(input) {
 
     estado.textContent = '';
     mostrarConfirmacion({
-      nombre: 'Producto escaneado',
+      nombre:    'Producto escaneado',
       calorias:  macros.calorias,
       proteinas: macros.proteinas,
       carbos:    macros.carbos,
       grasas:    macros.grasas,
-      por100g: true
+      por100g:   true
     });
 
   } catch (e) {
+    console.error('Error Tesseract:', e);
     estado.textContent = 'Error al procesar la imagen. Intenta de nuevo.';
   }
 
