@@ -1,3 +1,7 @@
+function formatNum(n) {
+  return Number(n).toFixed(1).replace('.', ',');
+}
+
 // Fecha de hoy
 const hoy = new Date();
 document.getElementById('fecha-hoy').textContent =
@@ -41,9 +45,9 @@ function renderLista() {
     li.innerHTML = `
       <div class="li-info">
         <span class="li-nombre">${a.nombre}</span>
-        <span class="li-macros">P: ${a.proteinas}g · C: ${a.carbos}g · G: ${a.grasas}g</span>
+        <span class="li-macros">P: ${formatNum(a.proteinas)}g · C: ${formatNum(a.carbos)}g · G: ${formatNum(a.grasas)}g</span>
       </div>
-      <span class="li-kcal">${a.calorias} kcal</span>
+      <span class="li-kcal">${formatNum(a.calorias)} kcal</span>
       <button class="btn-eliminar" onclick="eliminar(${i})">✕</button>
     `;
     ul.appendChild(li);
@@ -65,12 +69,11 @@ function mostrarConfirmacion(alimento) {
   document.getElementById('confirmar-info').innerHTML = `
     <strong>${alimento.nombre}</strong><br>
     ${esPor100g
-      ? '📊 Valores por 100g · ' + alimento.calorias + ' kcal · P:' + alimento.proteinas + 'g C:' + alimento.carbos + 'g G:' + alimento.grasas + 'g'
-      : '🔥 ' + alimento.calorias + ' kcal &nbsp;|&nbsp; P:' + alimento.proteinas + 'g C:' + alimento.carbos + 'g G:' + alimento.grasas + 'g'
+      ? `📊 Valores por 100g · ${formatNum(alimento.calorias)} kcal · P:${formatNum(alimento.proteinas)}g C:${formatNum(alimento.carbos)}g G:${formatNum(alimento.grasas)}g`
+      : `🔥 ${formatNum(alimento.calorias)} kcal &nbsp;|&nbsp; P:${formatNum(alimento.proteinas)}g C:${formatNum(alimento.carbos)}g G:${formatNum(alimento.grasas)}g`
     }
   `;
 
-  // Mostrar campo de gramos solo si viene de búsqueda (por 100g)
   const gramosContainer = document.getElementById('gramos-container');
   if (esPor100g) {
     gramosContainer.style.display = 'block';
@@ -90,10 +93,10 @@ function actualizarCalculo() {
   if (!gramos || gramos <= 0 || !alimentoPendiente) { div.innerHTML = ''; return; }
 
   const factor = gramos / 100;
-  const kcal  = Math.round(alimentoPendiente.calorias  * factor);
-  const prot  = Math.round(alimentoPendiente.proteinas * factor);
-  const carb  = Math.round(alimentoPendiente.carbos    * factor);
-  const gras  = Math.round(alimentoPendiente.grasas    * factor);
+  const kcal  = (alimentoPendiente.calorias  * factor).toFixed(1).replace('.', ',');
+  const prot  = (alimentoPendiente.proteinas * factor).toFixed(1).replace('.', ',');
+  const carb  = (alimentoPendiente.carbos    * factor).toFixed(1).replace('.', ',');
+  const gras  = (alimentoPendiente.grasas    * factor).toFixed(1).replace('.', ',');
 
   div.innerHTML = `Para <strong>${gramos}g</strong>: 🔥 ${kcal} kcal · P:${prot}g C:${carb}g G:${gras}g`;
 }
@@ -112,11 +115,11 @@ function confirmarAlimento() {
     }
     const factor = gramos / 100;
     alimento = {
-      nombre:    alimento.nombre + ` (${gramos}g)`,
-      calorias:  Math.round(alimento.calorias  * factor),
-      proteinas: Math.round(alimento.proteinas * factor),
-      carbos:    Math.round(alimento.carbos    * factor),
-      grasas:    Math.round(alimento.grasas    * factor)
+      nombre:    `${alimento.nombre} (${gramos}g)`,
+      calorias:  parseFloat((alimento.calorias  * factor).toFixed(1)),
+      proteinas: parseFloat((alimento.proteinas * factor).toFixed(1)),
+      carbos:    parseFloat((alimento.carbos    * factor).toFixed(1)),
+      grasas:    parseFloat((alimento.grasas    * factor).toFixed(1))
     };
   }
 
@@ -190,11 +193,11 @@ function seleccionarResultado(i) {
   const p = window._resultadosActuales[i];
   const n = p.nutriments;
   mostrarConfirmacion({
-    nombre: p.product_name,
-    calorias:  parseFloat((n['energy-kcal_100g']  || 0).toFixed(1)),
-    proteinas: parseFloat((n['proteins_100g']      || 0).toFixed(1)),
-    carbos:    parseFloat((n['carbohydrates_100g'] || 0).toFixed(1)),
-    grasas:    parseFloat((n['fat_100g']           || 0).toFixed(1)),
+    nombre:    p.product_name,
+    calorias:  n['energy-kcal_100g']  || 0,
+    proteinas: n['proteins_100g']      || 0,
+    carbos:    n['carbohydrates_100g'] || 0,
+    grasas:    n['fat_100g']           || 0,
     por100g: true
   });
 }
@@ -224,11 +227,11 @@ async function buscarPorBarras(codigo) {
     document.getElementById('estado-escaner').textContent = '';
 
     mostrarConfirmacion({
-      nombre: p.product_name || 'Producto sin nombre',
-      calorias:  parseFloat((n['energy-kcal_100g'] || 0).toFixed(1)),
-      proteinas: parseFloat((n['proteins_100g']    || 0).toFixed(1)),
-      carbos:    parseFloat((n['carbohydrates_100g']|| 0).toFixed(1)),
-      grasas:    parseFloat((n['fat_100g']          || 0).toFixed(1)),
+      nombre:    p.product_name || 'Producto sin nombre',
+      calorias:  n['energy-kcal_100g']   || 0,
+      proteinas: n['proteins_100g']       || 0,
+      carbos:    n['carbohydrates_100g']  || 0,
+      grasas:    n['fat_100g']            || 0,
       por100g: true
     });
   } catch {
@@ -286,25 +289,7 @@ async function escanearTabla(input) {
   estado.textContent = '📷 Procesando imagen...';
 
   try {
-    // Cargar imagen en canvas y recortar solo mitad izquierda (columna 100g)
-    const img = await new Promise((res, rej) => {
-      const i = new Image();
-      i.onload = () => res(i);
-      i.onerror = rej;
-      i.src = URL.createObjectURL(archivo);
-    });
-
-    const canvas = document.getElementById('canvas-barras');
-    // Solo tomar el 60% izquierdo de la imagen (donde está columna 100g)
-    canvas.width = Math.floor(img.width * 0.6);
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-
-    // Convertir canvas a blob para Tesseract
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-
-    const { data: { text } } = await Tesseract.recognize(blob, 'spa+eng', {
+    const { data: { text } } = await Tesseract.recognize(archivo, 'spa+eng', {
       logger: m => {
         if (m.status === 'recognizing text') {
           estado.textContent = `Procesando... ${Math.round(m.progress * 100)}%`;
