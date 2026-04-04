@@ -334,22 +334,28 @@ function extraerMacros(texto) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-  function extraerNumero(linea) {
-    // Buscar número con decimal (coma o punto)
-    const conDecimal = linea.match(/\d+[,.]\d+/);
-    if (conDecimal) return parseFloat(conDecimal[0].replace(',', '.'));
-    // Si no hay decimal, buscar entero
-    const entero = linea.match(/\d+/);
-    if (entero) return parseFloat(entero[0]);
+  console.log('Líneas procesadas:', lineas);
+
+  function extraerPrimerNumeroValido(linea) {
+    // Buscar todos los números con o sin decimal
+    const nums = linea.match(/\d+[,.]\d+|\d{2,}/g);
+    if (!nums) return null;
+    // Filtrar números que parezcan valores nutricionales (no años, no %)
+    for (const n of nums) {
+      const val = parseFloat(n.replace(',', '.'));
+      if (val > 0 && val < 10000) return val;
+    }
     return null;
   }
 
   function buscarLinea(patrones) {
     for (const linea of lineas) {
-      const l = linea.toLowerCase();
+      const l = linea.toLowerCase().replace(/\s+/g, ' ');
       for (const patron of patrones) {
         if (patron.test(l)) {
-          const valor = extraerNumero(linea);
+          console.log(`Match "${patron}" en línea: "${linea}"`);
+          const valor = extraerPrimerNumeroValido(linea);
+          console.log(`Valor extraído: ${valor}`);
           if (valor !== null) return valor;
         }
       }
@@ -357,26 +363,42 @@ function extraerMacros(texto) {
     return 0;
   }
 
+  // Para calorías buscar también en líneas cercanas si la línea de energía no tiene número
+  function buscarCalorias() {
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i].toLowerCase();
+      if (/energ[ií]a|kcal/.test(l)) {
+        // Intentar en la misma línea
+        const val = extraerPrimerNumeroValido(lineas[i]);
+        if (val !== null) return val;
+        // Si no hay número, buscar en la línea siguiente
+        if (i + 1 < lineas.length) {
+          const valNext = extraerPrimerNumeroValido(lineas[i + 1]);
+          if (valNext !== null) return valNext;
+        }
+      }
+    }
+    return 0;
+  }
+
   return {
-    calorias: buscarLinea([
-      /energ[ií]a\s*\(kcal\)/,
-      /energ[ií]a/,
-      /kcal/
-    ]),
+    calorias: buscarCalorias(),
     proteinas: buscarLinea([
       /prote[ií]nas?\s*\(g\)/,
       /prote[ií]nas?/
     ]),
     carbos: buscarLinea([
-      /h\s*\.?\s*de\s*c\s*disp/,
-      /h\s*de\s*c/,
-      /carbohidratos?\s*disp/,
+      /h\s*?de\s*?c\s*?disp/,
+      /hde\s*?c/,
+      /hdec/,
+      /h\.\s*de\s*c/,
       /hidratos\s*de\s*carbono/,
+      /carbohidratos?\s*disp/,
       /carbohidratos?/
     ]),
     grasas: buscarLinea([
-      /grasa[s]?\s*total[es]?\s*\(g\)/,
-      /grasa[s]?\s*total/,
+      /grasa\s*total\s*\(g\)/,
+      /grasa\s*total/,
       /grasas?\s*totales?/
     ])
   };
