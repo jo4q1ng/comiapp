@@ -829,3 +829,54 @@ body.oscuro .badge-ml { background: #0c4a6e; color: #7dd3fc; }
   margin-bottom: 1rem;
   border: 1px solid var(--borde);
 }
+
+/* ── Ingreso manual ── */
+.manual-macros-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.manual-macro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: relative;
+}
+
+.manual-macro-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--texto-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: unset;
+}
+
+.manual-macro-item input {
+  margin: 0;
+  text-align: center;
+  padding-right: 1.5rem;
+}
+
+.manual-macro-unit {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.55rem;
+  font-size: 0.72rem;
+  color: var(--texto-muted);
+  pointer-events: none;
+}
+
+.manual-tip {
+  background: var(--azul-claro);
+  border-radius: var(--radio-sm);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--texto-sec);
+  line-height: 1.5;
+  border: 1px solid var(--borde);
+}
+
+body.oscuro .manual-tip { color: #e2e8f0; }
