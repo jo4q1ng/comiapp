@@ -1130,8 +1130,8 @@ function cargarRecetas() {
   return JSON.parse(localStorage.getItem('comiapp-recetas') || '[]');
 }
 
-function guardarRecetas(recetas) {
-  localStorage.setItem('comiapp-recetas', JSON.stringify(recetas));
+function guardarRecetas(r) {
+  localStorage.setItem('comiapp-recetas', JSON.stringify(r));
 }
 
 function renderRecetas() {
@@ -1139,19 +1139,23 @@ function renderRecetas() {
   const recetas = cargarRecetas();
 
   if (recetas.length === 0) {
-    lista.innerHTML = '<p class="receta-vacia">Sin recetas aún. ¡Crea tu primera receta!</p>';
+    lista.innerHTML = '<p class="receta-vacia">Sin recetas aún. Toca "+ Nueva receta" para empezar.</p>';
     return;
   }
 
   lista.innerHTML = recetas.map((r, i) => {
-    const porcion = calcularTotalesReceta(r);
+    const p = calcularTotalesReceta(r);
     return `
       <div class="receta-card" onclick="verDetalleReceta(${i})">
         <div class="receta-card-info">
           <span class="receta-card-nombre">${r.nombre}</span>
-          <span class="receta-card-macros">P:${formatNum(porcion.proteinas)}g C:${formatNum(porcion.carbos)}g G:${formatNum(porcion.grasas)}g · ${r.porciones} porción(es)</span>
+          <span class="receta-card-sub">${r.ingredientes.length} ingredientes · ${r.porciones} porción${r.porciones > 1 ? 'es' : ''}</span>
+          <span class="receta-card-macros">P:${formatNum(p.proteinas)}g · C:${formatNum(p.carbos)}g · G:${formatNum(p.grasas)}g</span>
         </div>
-        <span class="receta-card-kcal">${formatNum(porcion.calorias)} kcal</span>
+        <div class="receta-card-kcal">
+          ${formatNum(p.calorias)}
+          <span>kcal/porción</span>
+        </div>
       </div>
     `;
   }).join('');
@@ -1159,7 +1163,8 @@ function renderRecetas() {
 
 function calcularTotalesReceta(receta) {
   const total = receta.ingredientes.reduce((acc, ing) => {
-    const factor = (parseFloat(ing.gramos) || 0) / 100;
+    const cantidad = parseFloat(ing.cantidad) || 0;
+    const factor   = cantidad / 100;
     return {
       calorias:  acc.calorias  + (parseFloat(ing.calorias)  || 0) * factor,
       proteinas: acc.proteinas + (parseFloat(ing.proteinas) || 0) * factor,
@@ -1194,9 +1199,9 @@ function mostrarFormReceta(idx = null) {
   cont.innerHTML = '';
 
   if (receta && receta.ingredientes.length > 0) {
-    receta.ingredientes.forEach(ing => agregarIngrediente(ing));
+    receta.ingredientes.forEach(ing => agregarIngrediente(ing, ing.unidad || 'g'));
   } else {
-    agregarIngrediente();
+    agregarIngrediente(null, 'g');
   }
 
   actualizarTotalesReceta();
@@ -1208,58 +1213,87 @@ function cancelarFormReceta() {
   recetaEditandoIdx = null;
 }
 
-function agregarIngrediente(datos = null) {
-  const cont = document.getElementById('receta-ingredientes');
-  const idx  = cont.children.length;
+function agregarIngrediente(datos = null, unidad = 'g') {
+  const cont  = document.getElementById('receta-ingredientes');
+  const esML  = unidad === 'ml';
+  const label = esML ? 'ml' : 'g';
+  const placeholder = esML ? 'Ej: leche, agua...' : 'Ej: avena, pollo...';
 
   const div = document.createElement('div');
-  div.className = 'ingrediente-row';
+  div.className = 'ingrediente-card';
+  div.dataset.unidad = unidad;
+
   div.innerHTML = `
-    <input type="text"   placeholder="Ingrediente"   class="ing-nombre"    value="${datos ? datos.nombre    : ''}" oninput="actualizarTotalesReceta()" />
-    <input type="number" placeholder="g"             class="ing-gramos"    value="${datos ? datos.gramos    : ''}" oninput="actualizarTotalesReceta()" />
-    <button class="btn-ing-eliminar" onclick="this.parentElement.remove();actualizarTotalesReceta()">✕</button>
-    <input type="number" placeholder="kcal/100g"     class="ing-calorias"  value="${datos ? datos.calorias  : ''}" oninput="actualizarTotalesReceta()" style="grid-column:1" />
-    <input type="number" placeholder="Prot g/100g"   class="ing-proteinas" value="${datos ? datos.proteinas : ''}" oninput="actualizarTotalesReceta()" />
-    <input type="number" placeholder="Carb g/100g"   class="ing-carbos"    value="${datos ? datos.carbos    : ''}" oninput="actualizarTotalesReceta()" />
-    <input type="number" placeholder="Gras g/100g"   class="ing-grasas"    value="${datos ? datos.grasas    : ''}" oninput="actualizarTotalesReceta()" style="grid-column:1" />
+    <div class="ingrediente-card-header">
+      <span class="ingrediente-tipo-badge ${esML ? 'badge-ml' : 'badge-g'}">${esML ? '💧 Líquido (ml)' : '🧱 Sólido (g)'}</span>
+      <button class="btn-ing-eliminar" onclick="this.closest('.ingrediente-card').remove();actualizarTotalesReceta()">✕ Eliminar</button>
+    </div>
+    <div class="ingrediente-fila">
+      <input type="text" class="ing-nombre" placeholder="${placeholder}" value="${datos ? datos.nombre : ''}" oninput="actualizarTotalesReceta()" />
+      <input type="number" class="ing-cantidad" placeholder="Cantidad (${label})" value="${datos ? datos.cantidad : ''}" oninput="actualizarTotalesReceta()" />
+    </div>
+    <p style="font-size:0.7rem;color:var(--texto-muted);margin:0.4rem 0 0.3rem">Valores nutricionales por cada 100${label}:</p>
+    <div class="ingrediente-fila-macros">
+      <div>
+        <input type="number" class="ing-calorias" placeholder="0" value="${datos ? datos.calorias : ''}" oninput="actualizarTotalesReceta()" />
+        <p class="ingrediente-macro-label">🔥 kcal</p>
+      </div>
+      <div>
+        <input type="number" class="ing-proteinas" placeholder="0" value="${datos ? datos.proteinas : ''}" oninput="actualizarTotalesReceta()" />
+        <p class="ingrediente-macro-label">💪 prot</p>
+      </div>
+      <div>
+        <input type="number" class="ing-carbos" placeholder="0" value="${datos ? datos.carbos : ''}" oninput="actualizarTotalesReceta()" />
+        <p class="ingrediente-macro-label">🌾 carb</p>
+      </div>
+      <div>
+        <input type="number" class="ing-grasas" placeholder="0" value="${datos ? datos.grasas : ''}" oninput="actualizarTotalesReceta()" />
+        <p class="ingrediente-macro-label">🥑 gras</p>
+      </div>
+    </div>
   `;
+
   cont.appendChild(div);
 }
 
 function actualizarTotalesReceta() {
   const porciones = parseFloat(document.getElementById('receta-porciones').value) || 1;
-  const rows      = document.getElementById('receta-ingredientes').children;
+  const cards     = document.getElementById('receta-ingredientes').querySelectorAll('.ingrediente-card');
   let total = { calorias: 0, proteinas: 0, carbos: 0, grasas: 0 };
 
-  Array.from(rows).forEach(row => {
-    const gramos    = parseFloat(row.querySelector('.ing-gramos')?.value)    || 0;
-    const calorias  = parseFloat(row.querySelector('.ing-calorias')?.value)  || 0;
-    const proteinas = parseFloat(row.querySelector('.ing-proteinas')?.value) || 0;
-    const carbos    = parseFloat(row.querySelector('.ing-carbos')?.value)    || 0;
-    const grasas    = parseFloat(row.querySelector('.ing-grasas')?.value)    || 0;
-    const f = gramos / 100;
+  cards.forEach(card => {
+    const cantidad  = parseFloat(card.querySelector('.ing-cantidad')?.value)   || 0;
+    const calorias  = parseFloat(card.querySelector('.ing-calorias')?.value)   || 0;
+    const proteinas = parseFloat(card.querySelector('.ing-proteinas')?.value)  || 0;
+    const carbos    = parseFloat(card.querySelector('.ing-carbos')?.value)     || 0;
+    const grasas    = parseFloat(card.querySelector('.ing-grasas')?.value)     || 0;
+    const f = cantidad / 100;
     total.calorias  += calorias  * f;
     total.proteinas += proteinas * f;
     total.carbos    += carbos    * f;
     total.grasas    += grasas    * f;
   });
 
-  const porPorcion = {
+  const p = {
     calorias:  (total.calorias  / porciones).toFixed(1),
     proteinas: (total.proteinas / porciones).toFixed(1),
     carbos:    (total.carbos    / porciones).toFixed(1),
     grasas:    (total.grasas    / porciones).toFixed(1)
   };
 
-  document.getElementById('receta-totales').innerHTML = `
-    <p style="font-size:0.75rem;color:var(--gris-medio);margin-bottom:0.5rem">Por porción (${porciones} porción${porciones > 1 ? 'es' : ''} en total)</p>
-    <div class="receta-totales-grid">
-      <div class="rt-item cal"><span class="rt-valor">${formatNum(porPorcion.calorias)}</span><span class="rt-label">kcal</span></div>
-      <div class="rt-item prot"><span class="rt-valor">${formatNum(porPorcion.proteinas)}g</span><span class="rt-label">prot</span></div>
-      <div class="rt-item carb"><span class="rt-valor">${formatNum(porPorcion.carbos)}g</span><span class="rt-label">carb</span></div>
-      <div class="rt-item gras"><span class="rt-valor">${formatNum(porPorcion.grasas)}g</span><span class="rt-label">gras</span></div>
-    </div>
-  `;
+  document.getElementById('receta-totales').innerHTML = cards.length === 0
+    ? '<p class="estado-texto">Agrega ingredientes para ver el cálculo</p>'
+    : `
+      <div class="receta-totales-grid">
+        <div class="rt-item cal"><span class="rt-valor">${formatNum(p.calorias)}</span><span class="rt-label">kcal</span></div>
+        <div class="rt-item prot"><span class="rt-valor">${formatNum(p.proteinas)}g</span><span class="rt-label">prot</span></div>
+        <div class="rt-item carb"><span class="rt-valor">${formatNum(p.carbos)}g</span><span class="rt-label">carb</span></div>
+        <div class="rt-item gras"><span class="rt-valor">${formatNum(p.grasas)}g</span><span class="rt-label">gras</span></div>
+      </div>
+      <p style="font-size:0.72rem;color:var(--texto-muted);margin-top:0.5rem;text-align:center">
+        Por porción · ${porciones} porción${porciones > 1 ? 'es' : ''} en total
+      </p>
+    `;
 }
 
 function guardarReceta() {
@@ -1267,17 +1301,18 @@ function guardarReceta() {
   const porciones = parseFloat(document.getElementById('receta-porciones').value) || 1;
   if (!nombre) { alert('Escribe el nombre de la receta'); return; }
 
-  const rows = document.getElementById('receta-ingredientes').children;
-  const ingredientes = Array.from(rows).map(row => ({
-    nombre:    row.querySelector('.ing-nombre')?.value.trim()     || '',
-    gramos:    parseFloat(row.querySelector('.ing-gramos')?.value)    || 0,
-    calorias:  parseFloat(row.querySelector('.ing-calorias')?.value)  || 0,
-    proteinas: parseFloat(row.querySelector('.ing-proteinas')?.value) || 0,
-    carbos:    parseFloat(row.querySelector('.ing-carbos')?.value)    || 0,
-    grasas:    parseFloat(row.querySelector('.ing-grasas')?.value)    || 0
-  })).filter(ing => ing.nombre && ing.gramos > 0);
+  const cards = document.getElementById('receta-ingredientes').querySelectorAll('.ingrediente-card');
+  const ingredientes = Array.from(cards).map(card => ({
+    nombre:    card.querySelector('.ing-nombre')?.value.trim()     || '',
+    cantidad:  parseFloat(card.querySelector('.ing-cantidad')?.value)   || 0,
+    unidad:    card.dataset.unidad || 'g',
+    calorias:  parseFloat(card.querySelector('.ing-calorias')?.value)   || 0,
+    proteinas: parseFloat(card.querySelector('.ing-proteinas')?.value)  || 0,
+    carbos:    parseFloat(card.querySelector('.ing-carbos')?.value)     || 0,
+    grasas:    parseFloat(card.querySelector('.ing-grasas')?.value)     || 0
+  })).filter(ing => ing.nombre && ing.cantidad > 0);
 
-  if (ingredientes.length === 0) { alert('Agrega al menos un ingrediente con gramos'); return; }
+  if (ingredientes.length === 0) { alert('Agrega al menos un ingrediente con nombre y cantidad'); return; }
 
   const recetas = cargarRecetas();
   const receta  = { nombre, porciones, ingredientes };
@@ -1295,30 +1330,39 @@ function verDetalleReceta(idx) {
   recetaDetalleIdx = idx;
   const recetas = cargarRecetas();
   const receta  = recetas[idx];
-  const porcion = calcularTotalesReceta(receta);
+  const p       = calcularTotalesReceta(receta);
 
   document.getElementById('recetas-lista-container').classList.add('oculto');
   document.getElementById('receta-form-container').classList.add('oculto');
   document.getElementById('receta-detalle-container').classList.remove('oculto');
   document.getElementById('receta-detalle-nombre').textContent = receta.nombre;
 
+  const ings = receta.ingredientes.map(ing => {
+    const f    = (parseFloat(ing.cantidad) || 0) / 100;
+    const kcal = ((parseFloat(ing.calorias) || 0) * f).toFixed(1);
+    return `
+      <div class="receta-detalle-ing">
+        <div>
+          <span>${ing.nombre}</span>
+          <span style="margin-left:0.5rem;font-size:0.72rem;color:var(--texto-muted)">${ing.cantidad}${ing.unidad || 'g'}</span>
+        </div>
+        <span class="receta-detalle-kcal">${formatNum(kcal)} kcal</span>
+      </div>
+    `;
+  }).join('');
+
   document.getElementById('receta-detalle-contenido').innerHTML = `
-    <div class="receta-totales" style="margin-bottom:0.75rem">
-      <p style="font-size:0.75rem;color:var(--gris-medio);margin-bottom:0.5rem">Por porción · ${receta.porciones} porción(es) en total</p>
+    <div class="receta-totales-box">
+      <p style="font-size:0.72rem;color:var(--texto-muted);margin-bottom:0.75rem">Por porción · ${receta.porciones} porción${receta.porciones > 1 ? 'es' : ''} en total</p>
       <div class="receta-totales-grid">
-        <div class="rt-item cal"><span class="rt-valor">${formatNum(porcion.calorias)}</span><span class="rt-label">kcal</span></div>
-        <div class="rt-item prot"><span class="rt-valor">${formatNum(porcion.proteinas)}g</span><span class="rt-label">prot</span></div>
-        <div class="rt-item carb"><span class="rt-valor">${formatNum(porcion.carbos)}g</span><span class="rt-label">carb</span></div>
-        <div class="rt-item gras"><span class="rt-valor">${formatNum(porcion.grasas)}g</span><span class="rt-label">gras</span></div>
+        <div class="rt-item cal"><span class="rt-valor">${formatNum(p.calorias)}</span><span class="rt-label">kcal</span></div>
+        <div class="rt-item prot"><span class="rt-valor">${formatNum(p.proteinas)}g</span><span class="rt-label">prot</span></div>
+        <div class="rt-item carb"><span class="rt-valor">${formatNum(p.carbos)}g</span><span class="rt-label">carb</span></div>
+        <div class="rt-item gras"><span class="rt-valor">${formatNum(p.grasas)}g</span><span class="rt-label">gras</span></div>
       </div>
     </div>
     <h2 style="margin-bottom:0.5rem">Ingredientes</h2>
-    ${receta.ingredientes.map(ing => `
-      <div class="receta-detalle-ing">
-        <span>${ing.nombre}</span>
-        <span style="color:var(--gris-medio)">${ing.gramos}g</span>
-      </div>
-    `).join('')}
+    ${ings}
     <button class="btn-cancelar" onclick="eliminarReceta(${idx})" style="margin-top:1rem;color:#ef4444;border-color:#ef4444">🗑️ Eliminar receta</button>
   `;
 }
@@ -1347,15 +1391,14 @@ function agregarRecetaARegistro() {
   if (recetaDetalleIdx === null) return;
   const recetas = cargarRecetas();
   const receta  = recetas[recetaDetalleIdx];
-  const porcion = calcularTotalesReceta(receta);
-
+  const p       = calcularTotalesReceta(receta);
   cerrarDetalleReceta();
   mostrarConfirmacion({
     nombre:    receta.nombre,
-    calorias:  porcion.calorias,
-    proteinas: porcion.proteinas,
-    carbos:    porcion.carbos,
-    grasas:    porcion.grasas,
+    calorias:  p.calorias,
+    proteinas: p.proteinas,
+    carbos:    p.carbos,
+    grasas:    p.grasas,
     por100g:   false
   });
 }

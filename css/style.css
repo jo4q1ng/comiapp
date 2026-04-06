@@ -715,37 +715,82 @@ body.oscuro .ep-label { color: #e2e8f0; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--borde);
-  cursor: pointer;
-}
-
-.receta-card:last-child { border-bottom: none; }
-.receta-card:active { opacity: 0.7; }
-
-.receta-card-info { display: flex; flex-direction: column; gap: 3px; }
-.receta-card-nombre { font-weight: 500; font-size: 0.92rem; color: var(--texto-ppal); }
-.receta-card-macros { font-size: 0.72rem; color: var(--texto-muted); }
-.receta-card-kcal { font-weight: 700; color: var(--azul); font-size: 0.9rem; white-space: nowrap; }
-
-.ingrediente-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 0.4rem;
-  margin-bottom: 0.5rem;
-  align-items: center;
-}
-
-.ingrediente-row input { margin: 0; font-size: 0.85rem; padding: 0.5rem 0.65rem; }
-.ingrediente-row .ing-gramos { width: 70px; }
-.btn-ing-eliminar { width: auto; background: none; color: #ef4444; font-size: 1rem; padding: 0.3rem 0.5rem; margin: 0; }
-
-.receta-totales {
-  background: var(--azul-claro);
+  padding: 0.9rem 0.75rem;
   border-radius: var(--radio-sm);
-  padding: 0.85rem;
-  margin-top: 0.5rem;
-  border: 1px solid var(--borde);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  background: var(--gris-claro);
+  border: 1.5px solid var(--borde);
+  transition: border-color 0.15s;
+}
+
+.receta-card:active { border-color: var(--azul-accent); }
+.receta-card-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.receta-card-nombre { font-weight: 600; font-size: 0.92rem; color: var(--texto-ppal); }
+.receta-card-sub { font-size: 0.75rem; color: var(--texto-muted); }
+.receta-card-macros { font-size: 0.72rem; color: var(--texto-muted); margin-top: 2px; }
+
+.receta-card-kcal {
+  font-weight: 700; color: var(--azul); font-size: 1rem;
+  white-space: nowrap; margin-left: 0.75rem;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+}
+
+.receta-card-kcal span { font-size: 0.65rem; font-weight: 400; color: var(--texto-muted); }
+
+.ingrediente-card {
+  background: var(--gris-claro);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-sm);
+  padding: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.ingrediente-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.ingrediente-tipo-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-g  { background: #dbeafe; color: #1d4ed8; }
+.badge-ml { background: #e0f2fe; color: #0369a1; }
+
+body.oscuro .badge-g  { background: #1e3a5f; color: #93c5fd; }
+body.oscuro .badge-ml { background: #0c4a6e; color: #7dd3fc; }
+
+.ingrediente-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.ingrediente-fila input { margin: 0; font-size: 0.85rem; padding: 0.5rem 0.65rem; }
+
+.ingrediente-fila-macros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.ingrediente-fila-macros input { margin: 0; font-size: 0.82rem; padding: 0.45rem 0.5rem; text-align: center; }
+
+.ingrediente-macro-label {
+  font-size: 0.62rem;
+  color: var(--texto-muted);
+  text-align: center;
+  margin-top: 2px;
+  letter-spacing: 0.03em;
 }
 
 .receta-totales-grid {
@@ -756,7 +801,7 @@ body.oscuro .ep-label { color: #e2e8f0; }
 }
 
 .rt-item { display: flex; flex-direction: column; gap: 2px; }
-.rt-valor { font-size: 1rem; font-weight: 700; }
+.rt-valor { font-size: 1.1rem; font-weight: 700; }
 .rt-label { font-size: 0.62rem; color: var(--texto-muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .rt-item.cal  .rt-valor { color: var(--azul); }
 .rt-item.prot .rt-valor { color: var(--prot); }
@@ -766,11 +811,21 @@ body.oscuro .ep-label { color: #e2e8f0; }
 .receta-detalle-ing {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.85rem;
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
   border-bottom: 1px solid var(--borde);
   color: var(--texto-sec);
 }
 
 .receta-detalle-ing:last-child { border-bottom: none; }
+.receta-detalle-kcal { font-size: 0.75rem; color: var(--texto-muted); }
 .receta-vacia { text-align: center; color: var(--texto-muted); font-size: 0.85rem; padding: 1rem 0; }
+
+.receta-totales-box {
+  background: var(--azul-claro);
+  border-radius: var(--radio-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--borde);
+}

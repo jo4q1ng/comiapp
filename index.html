@@ -313,7 +313,7 @@
   </div>
 
   <!-- ── Ejercicio ── -->
-    <div class="seccion oculto" id="sec-ejercicio">
+  <div class="seccion oculto" id="sec-ejercicio">
 
     <div class="formulario">
         <h2>🏋️ Registrar ejercicio</h2>
@@ -365,56 +365,78 @@
         <div id="ejercicio-semana"></div>
     </div>
 
-    </div>
+  </div>
 
-    <!-- ── Recetas ── -->
-    <div class="seccion oculto" id="sec-recetas">
+  <!-- ── Recetas ── -->
+  <div class="seccion oculto" id="sec-recetas">
 
     <!-- Lista de recetas -->
-    <div class="formulario" id="recetas-lista-container">
+    <div id="recetas-lista-container">
+      <div class="formulario">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-            <h2 style="margin:0">🍳 Mis recetas</h2>
-            <button class="btn-editar-metas" onclick="mostrarFormReceta()">+ Nueva</button>
+          <h2 style="margin:0">🍳 Mis recetas</h2>
+          <button class="btn-editar-metas" onclick="mostrarFormReceta()">+ Nueva receta</button>
         </div>
+        <p class="estado-texto" style="margin-bottom:0.75rem">Toca una receta para ver sus detalles o agregarla al registro</p>
         <div id="recetas-lista"></div>
+      </div>
     </div>
 
     <!-- Formulario nueva/editar receta -->
-    <div class="formulario oculto" id="receta-form-container">
+    <div id="receta-form-container" class="oculto">
+      <div class="formulario">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-            <h2 style="margin:0" id="receta-form-titulo">Nueva receta</h2>
-            <button class="btn-editar-metas" onclick="cancelarFormReceta()">✕ Cancelar</button>
+          <h2 style="margin:0" id="receta-form-titulo">Nueva receta</h2>
+          <button class="btn-editar-metas" onclick="cancelarFormReceta()">✕ Cancelar</button>
         </div>
 
         <label class="calc-label">Nombre de la receta</label>
-        <input type="text" id="receta-nombre" placeholder="Ej: Avena con frutas" />
+        <input type="text" id="receta-nombre" placeholder="Ej: Batido proteico, Avena..." />
 
-        <label class="calc-label">Porciones que rinde</label>
-        <input type="number" id="receta-porciones" placeholder="Ej: 2" value="1" />
+        <label class="calc-label">¿Cuántas porciones rinde?</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+          <input type="number" id="receta-porciones" placeholder="1" value="1" style="flex:1;margin:0" oninput="actualizarTotalesReceta()" />
+          <span style="font-size:0.85rem;color:var(--texto-muted);white-space:nowrap">porción(es)</span>
+        </div>
+      </div>
 
-        <label class="calc-label">Ingredientes</label>
+      <!-- Ingredientes -->
+      <div class="formulario">
+        <h2>Ingredientes</h2>
+        <p class="estado-texto" style="margin-bottom:0.75rem;text-align:left">Agrega cada ingrediente con su cantidad y sus valores nutricionales por 100g/100ml</p>
         <div id="receta-ingredientes"></div>
-        <button class="btn-cancelar" onclick="agregarIngrediente()" style="margin-bottom:0.75rem">+ Agregar ingrediente</button>
+        <button class="btn-cancelar" onclick="agregarIngrediente(null, 'g')" style="margin-bottom:0.5rem">+ Agregar sólido (g)</button>
+        <button class="btn-cancelar" onclick="agregarIngrediente(null, 'ml')">+ Agregar líquido (ml)</button>
+      </div>
 
-        <div class="receta-totales" id="receta-totales"></div>
+      <!-- Totales en tiempo real -->
+      <div class="formulario" id="receta-totales-container">
+        <h2>Valores por porción</h2>
+        <div id="receta-totales"><p class="estado-texto">Agrega ingredientes para ver el cálculo</p></div>
+      </div>
 
-        <button onclick="guardarReceta()" style="margin-top:0.75rem">💾 Guardar receta</button>
+      <div style="padding:0 1rem">
+        <button onclick="guardarReceta()">💾 Guardar receta</button>
+      </div>
     </div>
 
     <!-- Detalle de receta -->
-    <div class="formulario oculto" id="receta-detalle-container">
+    <div id="receta-detalle-container" class="oculto">
+      <div class="formulario">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h2 style="margin:0" id="receta-detalle-nombre"></h2>
-        <button class="btn-editar-metas" onclick="cerrarDetalleReceta()">✕ Cerrar</button>
+          <h2 style="margin:0" id="receta-detalle-nombre"></h2>
+          <button class="btn-editar-metas" onclick="cerrarDetalleReceta()">✕</button>
         </div>
         <div id="receta-detalle-contenido"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-        <button onclick="agregarRecetaARegistro()">+ Agregar al registro</button>
-        <button onclick="editarReceta()" class="btn-cancelar">✏️ Editar</button>
-        </div>
+      </div>
+
+      <div style="padding:0 1rem;display:flex;flex-direction:column;gap:0.5rem">
+        <button onclick="agregarRecetaARegistro()">➕ Agregar al registro de hoy</button>
+        <button onclick="editarReceta()" class="btn-cancelar">✏️ Editar receta</button>
+      </div>
     </div>
 
-    </div>
+  </div>
 
 </main>
 
