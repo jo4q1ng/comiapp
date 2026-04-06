@@ -33,6 +33,7 @@ function mostrarSeccion(seccion) {
   if (seccion === 'historial') renderHistorial();
   if (seccion === 'bienestar') { renderBienestarHistorial(); cargarBienestarHoy(); }
   if (seccion === 'inicio')   renderComidas();
+  if (seccion === 'ejercicio') renderEjercicio();
 }
 
 function abrirMenuMas() {
@@ -978,6 +979,146 @@ function cargarModoOscuro() {
     document.body.classList.add('oscuro');
     document.getElementById('btn-modo').textContent = '☀️';
   }
+}
+
+// ─── Ejercicio ────────────────────────────────────────────
+let ejercicioSeleccionado  = 'correr';
+let intensidadSeleccionada = 'baja';
+
+const MET = {
+  correr:   { baja: 8,  media: 11, alta: 14 },
+  caminar:  { baja: 3,  media: 4,  alta: 5  },
+  ciclismo: { baja: 6,  media: 9,  alta: 12 },
+  natacion: { baja: 6,  media: 8,  alta: 11 },
+  pesas:    { baja: 3,  media: 5,  alta: 7  },
+  hiit:     { baja: 8,  media: 10, alta: 14 },
+  yoga:     { baja: 2.5,media: 3,  alta: 4  },
+  otro:     { baja: 4,  media: 6,  alta: 8  }
+};
+
+function seleccionarEjercicio(tipo, btn) {
+  ejercicioSeleccionado = tipo;
+  document.querySelectorAll('.ejercicio-tipo').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  document.getElementById('ejercicio-otro-container').classList.toggle('oculto', tipo !== 'otro');
+  estimarCalorias();
+}
+
+function seleccionarIntensidad(int) {
+  intensidadSeleccionada = int;
+  ['baja','media','alta'].forEach(i =>
+    document.getElementById(`int-${i}`).classList.toggle('activo', i === int)
+  );
+  estimarCalorias();
+}
+
+function estimarCalorias() {
+  const duracion = parseFloat(document.getElementById('ejercicio-duracion').value) || 0;
+  const peso     = (() => {
+    const pesos = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+    return pesos.length > 0 ? pesos[pesos.length-1].peso : 70;
+  })();
+
+  const met  = MET[ejercicioSeleccionado][intensidadSeleccionada];
+  const kcal = duracion > 0 ? Math.round(met * peso * (duracion / 60)) : 0;
+
+  document.getElementById('ejercicio-kcal-est').textContent = duracion > 0 ? `${kcal} kcal` : '—';
+}
+
+function registrarEjercicio() {
+  const duracion = parseFloat(document.getElementById('ejercicio-duracion').value);
+  if (!duracion || duracion <= 0) { alert('Ingresa la duración del ejercicio'); return; }
+
+  const peso = (() => {
+    const pesos = JSON.parse(localStorage.getItem('comiapp-pesos') || '[]');
+    return pesos.length > 0 ? pesos[pesos.length-1].peso : 70;
+  })();
+
+  const met   = MET[ejercicioSeleccionado][intensidadSeleccionada];
+  const kcal  = Math.round(met * peso * (duracion / 60));
+  const nombre = ejercicioSeleccionado === 'otro'
+    ? document.getElementById('ejercicio-nombre-custom').value.trim() || 'Ejercicio'
+    : document.getElementById(`ejercicio-tipos`).querySelector('.activo').textContent.trim();
+
+  const fecha    = hoy.toISOString().slice(0, 10);
+  const ejercicios = JSON.parse(localStorage.getItem(`comiapp-ejercicio-${fecha}`) || '[]');
+  ejercicios.push({ nombre, tipo: ejercicioSeleccionado, duracion, intensidad: intensidadSeleccionada, kcal });
+  localStorage.setItem(`comiapp-ejercicio-${fecha}`, JSON.stringify(ejercicios));
+
+  document.getElementById('ejercicio-duracion').value = '';
+  document.getElementById('ejercicio-kcal-est').textContent = '—';
+  renderEjercicio();
+  alert(`✅ ${nombre} registrado — ${kcal} kcal quemadas`);
+}
+
+function renderEjercicio() {
+  const fecha     = hoy.toISOString().slice(0, 10);
+  const ejercicios= JSON.parse(localStorage.getItem(`comiapp-ejercicio-${fecha}`) || '[]');
+  const resumen   = document.getElementById('ejercicio-resumen-hoy');
+
+  const totalKcal = ejercicios.reduce((s, e) => s + e.kcal, 0);
+  const totalMin  = ejercicios.reduce((s, e) => s + e.duracion, 0);
+
+  if (ejercicios.length === 0) {
+    resumen.innerHTML = '<p class="cargando">Sin ejercicios registrados hoy</p>';
+  } else {
+    resumen.innerHTML = `
+      <div class="ejercicio-resumen-card"><span class="erc-valor">${totalKcal}</span><span class="erc-label">kcal quemadas</span></div>
+      <div class="ejercicio-resumen-card"><span class="erc-valor">${totalMin}</span><span class="erc-label">minutos</span></div>
+      <div class="ejercicio-resumen-card"><span class="erc-valor">${ejercicios.length}</span><span class="erc-label">sesiones</span></div>
+    `;
+  }
+
+  // Lista del día
+  const lista = document.getElementById('ejercicio-resumen-hoy');
+  if (ejercicios.length > 0) {
+    resumen.innerHTML += ejercicios.map((e, i) => `
+      <div class="ejercicio-item" style="width:100%">
+        <div class="ejercicio-info">
+          <span class="ejercicio-nombre">${e.nombre}</span>
+          <span class="ejercicio-detalle">${e.duracion} min · ${e.intensidad}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span class="ejercicio-kcal">-${e.kcal} kcal</span>
+          <button class="btn-eliminar" onclick="eliminarEjercicio(${i})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Semana
+  const semanaDiv = document.getElementById('ejercicio-semana');
+  const diasSemana = [];
+  for (let i = 6; i >= 0; i--) {
+    const f    = new Date(hoy);
+    f.setDate(f.getDate() - i);
+    const clave = `comiapp-ejercicio-${f.toISOString().slice(0, 10)}`;
+    const data  = JSON.parse(localStorage.getItem(clave) || '[]');
+    if (data.length > 0) {
+      diasSemana.push({
+        fecha:  f.toLocaleDateString('es-CL', { weekday:'short', day:'numeric', month:'short' }),
+        kcal:   data.reduce((s, e) => s + e.kcal, 0),
+        min:    data.reduce((s, e) => s + e.duracion, 0)
+      });
+    }
+  }
+
+  semanaDiv.innerHTML = diasSemana.length === 0
+    ? '<p class="cargando">Sin registros esta semana</p>'
+    : diasSemana.map(d => `
+        <div class="ejercicio-semana-dia">
+          <span class="ejercicio-semana-fecha">${d.fecha} · ${d.min} min</span>
+          <span class="ejercicio-semana-kcal">-${d.kcal} kcal</span>
+        </div>
+      `).join('');
+}
+
+function eliminarEjercicio(i) {
+  const fecha     = hoy.toISOString().slice(0, 10);
+  const ejercicios= JSON.parse(localStorage.getItem(`comiapp-ejercicio-${fecha}`) || '[]');
+  ejercicios.splice(i, 1);
+  localStorage.setItem(`comiapp-ejercicio-${fecha}`, JSON.stringify(ejercicios));
+  renderEjercicio();
 }
 
 // ─── Init ─────────────────────────────────────────────────

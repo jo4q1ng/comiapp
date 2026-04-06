@@ -673,3 +673,101 @@ body.oscuro .leyenda              { color: #475569; }
 body.oscuro .agua-meta-texto      { color: #64748b; }
 body.oscuro .progreso-alimento-nombre { color: #cbd5e1; }
 body.oscuro .btn-editar-metas     { color: #64748b; border-color: #334155; }
+
+/* ── Ejercicio ── */
+.ejercicio-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ejercicio-tipo {
+  padding: 0.5rem 0.25rem;
+  background: var(--gris-claro);
+  color: var(--gris-oscuro);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-sm);
+  font-size: 0.72rem;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.4;
+  transition: all 0.15s;
+}
+
+.ejercicio-tipo.activo {
+  background: var(--azul-claro);
+  color: var(--azul);
+  border-color: var(--azul-accent);
+  font-weight: 600;
+}
+
+.ejercicio-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--azul-claro);
+  border-radius: var(--radio-sm);
+  padding: 0.85rem 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid var(--borde);
+}
+
+.ep-label { font-size: 0.85rem; color: var(--gris-oscuro); }
+.ep-valor { font-size: 1.3rem; font-weight: 700; color: var(--azul); }
+
+.ejercicio-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--gris-claro);
+  font-size: 0.88rem;
+}
+
+.ejercicio-item:last-child { border-bottom: none; }
+.ejercicio-info { display: flex; flex-direction: column; gap: 2px; }
+.ejercicio-nombre { font-weight: 500; color: var(--carbon); }
+.ejercicio-detalle { font-size: 0.72rem; color: var(--gris-medio); }
+.ejercicio-kcal { font-weight: 700; color: var(--gras); font-size: 0.9rem; }
+
+.ejercicio-resumen {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ejercicio-resumen-card {
+  flex: 1;
+  min-width: 80px;
+  background: var(--gris-claro);
+  border-radius: var(--radio-sm);
+  padding: 0.75rem;
+  text-align: center;
+  border: 1px solid var(--borde);
+}
+
+.erc-valor { font-size: 1.1rem; font-weight: 700; color: var(--azul); display: block; }
+.erc-label { font-size: 0.65rem; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.ejercicio-semana-dia {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--gris-claro);
+  font-size: 0.85rem;
+}
+
+.ejercicio-semana-dia:last-child { border-bottom: none; }
+.ejercicio-semana-fecha { color: var(--gris-oscuro); text-transform: capitalize; }
+.ejercicio-semana-kcal { font-weight: 600; color: var(--gras); }
+
+body.oscuro .ejercicio-tipo { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+body.oscuro .ejercicio-tipo.activo { background: #1e3a5f; color: #93c5fd; border-color: #60a5fa; }
+body.oscuro .ejercicio-preview { background: #1e3a5f; border-color: #334155; }
+body.oscuro .ejercicio-resumen-card { background: #1e293b; border-color: #334155; }
+body.oscuro .ejercicio-nombre { color: #e2e8f0; }
+body.oscuro .ejercicio-semana-fecha { color: #cbd5e1; }

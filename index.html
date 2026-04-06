@@ -312,6 +312,61 @@
     </div>
   </div>
 
+  <!-- ── Ejercicio ── -->
+    <div class="seccion oculto" id="sec-ejercicio">
+
+    <div class="formulario">
+        <h2>🏋️ Registrar ejercicio</h2>
+
+        <label class="calc-label">Tipo de ejercicio</label>
+        <div class="ejercicio-grid" id="ejercicio-tipos">
+            <button class="ejercicio-tipo activo" onclick="seleccionarEjercicio('correr', this)">🏃 Correr</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('caminar', this)">🚶 Caminar</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('ciclismo', this)">🚴 Ciclismo</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('natacion', this)">🏊 Natación</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('pesas', this)">🏋️ Pesas</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('hiit', this)">⚡ HIIT</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('yoga', this)">🧘 Yoga</button>
+            <button class="ejercicio-tipo" onclick="seleccionarEjercicio('otro', this)">➕ Otro</button>
+        </div>
+
+        <div id="ejercicio-otro-container" class="oculto">
+            <label class="calc-label">Nombre del ejercicio</label>
+            <input type="text" id="ejercicio-nombre-custom" placeholder="Ej: Crossfit, Pilates..." />
+        </div>
+
+        <label class="calc-label">Duración (minutos)</label>
+        <input type="number" id="ejercicio-duracion" placeholder="Ej: 45" oninput="estimarCalorias()" />
+
+        <label class="calc-label">Intensidad</label>
+        <div class="calc-opciones tres">
+            <button class="calc-opcion activo" id="int-baja" onclick="seleccionarIntensidad('baja')">🟢 Baja</button>
+            <button class="calc-opcion" id="int-media" onclick="seleccionarIntensidad('media')">🟡 Media</button>
+            <button class="calc-opcion" id="int-alta" onclick="seleccionarIntensidad('alta')">🔴 Alta</button>
+        </div>
+
+        <div class="ejercicio-preview" id="ejercicio-preview">
+            <span class="ep-label">Calorías estimadas</span>
+            <span class="ep-valor" id="ejercicio-kcal-est">—</span>
+        </div>
+
+        <button onclick="registrarEjercicio()" style="margin-top:0.75rem">💾 Registrar ejercicio</button>
+    </div>
+
+    <!-- Resumen del día -->
+    <div class="formulario">
+        <h2>📊 Hoy</h2>
+        <div class="ejercicio-resumen" id="ejercicio-resumen-hoy"></div>
+    </div>
+
+    <!-- Historial semanal -->
+    <div class="formulario">
+        <h2>📅 Esta semana</h2>
+        <div id="ejercicio-semana"></div>
+    </div>
+
+    </div>
+
 </main>
 
 <!-- ── Modales (únicos, fuera de main) ── -->
@@ -383,6 +438,7 @@
     <p class="menu-mas-titulo">Más opciones</p>
     <button class="menu-mas-item" onclick="irSeccion('historial')">📅 Historial</button>
     <button class="menu-mas-item" onclick="irSeccion('bienestar')">📝 Bienestar</button>
+    <button class="menu-mas-item" onclick="irSeccion('ejercicio')">🏋️ Ejercicio</button>
     <button class="menu-mas-item" onclick="cerrarMenuMas()">✕ Cerrar</button>
   </div>
 </div>
