@@ -367,6 +367,55 @@
 
     </div>
 
+    <!-- ── Recetas ── -->
+    <div class="seccion oculto" id="sec-recetas">
+
+    <!-- Lista de recetas -->
+    <div class="formulario" id="recetas-lista-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <h2 style="margin:0">🍳 Mis recetas</h2>
+            <button class="btn-editar-metas" onclick="mostrarFormReceta()">+ Nueva</button>
+        </div>
+        <div id="recetas-lista"></div>
+    </div>
+
+    <!-- Formulario nueva/editar receta -->
+    <div class="formulario oculto" id="receta-form-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <h2 style="margin:0" id="receta-form-titulo">Nueva receta</h2>
+            <button class="btn-editar-metas" onclick="cancelarFormReceta()">✕ Cancelar</button>
+        </div>
+
+        <label class="calc-label">Nombre de la receta</label>
+        <input type="text" id="receta-nombre" placeholder="Ej: Avena con frutas" />
+
+        <label class="calc-label">Porciones que rinde</label>
+        <input type="number" id="receta-porciones" placeholder="Ej: 2" value="1" />
+
+        <label class="calc-label">Ingredientes</label>
+        <div id="receta-ingredientes"></div>
+        <button class="btn-cancelar" onclick="agregarIngrediente()" style="margin-bottom:0.75rem">+ Agregar ingrediente</button>
+
+        <div class="receta-totales" id="receta-totales"></div>
+
+        <button onclick="guardarReceta()" style="margin-top:0.75rem">💾 Guardar receta</button>
+    </div>
+
+    <!-- Detalle de receta -->
+    <div class="formulario oculto" id="receta-detalle-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin:0" id="receta-detalle-nombre"></h2>
+        <button class="btn-editar-metas" onclick="cerrarDetalleReceta()">✕ Cerrar</button>
+        </div>
+        <div id="receta-detalle-contenido"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+        <button onclick="agregarRecetaARegistro()">+ Agregar al registro</button>
+        <button onclick="editarReceta()" class="btn-cancelar">✏️ Editar</button>
+        </div>
+    </div>
+
+    </div>
+
 </main>
 
 <!-- ── Modales (únicos, fuera de main) ── -->
@@ -439,6 +488,7 @@
     <button class="menu-mas-item" onclick="irSeccion('historial')">📅 Historial</button>
     <button class="menu-mas-item" onclick="irSeccion('bienestar')">📝 Bienestar</button>
     <button class="menu-mas-item" onclick="irSeccion('ejercicio')">🏋️ Ejercicio</button>
+    <button class="menu-mas-item" onclick="irSeccion('recetas')">🍳 Mis recetas</button>
     <button class="menu-mas-item" onclick="cerrarMenuMas()">✕ Cerrar</button>
   </div>
 </div>

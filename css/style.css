@@ -771,3 +771,72 @@ body.oscuro .ejercicio-preview { background: #1e3a5f; border-color: #334155; }
 body.oscuro .ejercicio-resumen-card { background: #1e293b; border-color: #334155; }
 body.oscuro .ejercicio-nombre { color: #e2e8f0; }
 body.oscuro .ejercicio-semana-fecha { color: #cbd5e1; }
+
+/* ── Recetas ── */
+.receta-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--gris-claro);
+  cursor: pointer;
+}
+
+.receta-card:last-child { border-bottom: none; }
+.receta-card:active { opacity: 0.7; }
+
+.receta-card-info { display: flex; flex-direction: column; gap: 3px; }
+.receta-card-nombre { font-weight: 500; font-size: 0.92rem; color: var(--carbon); }
+.receta-card-macros { font-size: 0.72rem; color: var(--gris-medio); }
+.receta-card-kcal { font-weight: 700; color: var(--azul); font-size: 0.9rem; white-space: nowrap; }
+
+.ingrediente-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.ingrediente-row input { margin: 0; font-size: 0.85rem; padding: 0.5rem 0.65rem; }
+.ingrediente-row .ing-gramos { width: 70px; }
+.btn-ing-eliminar { width: auto; background: none; color: #ef4444; font-size: 1rem; padding: 0.3rem 0.5rem; margin: 0; }
+
+.receta-totales {
+  background: var(--azul-claro);
+  border-radius: var(--radio-sm);
+  padding: 0.85rem;
+  margin-top: 0.5rem;
+  border: 1px solid var(--borde);
+}
+
+.receta-totales-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.rt-item { display: flex; flex-direction: column; gap: 2px; }
+.rt-valor { font-size: 1rem; font-weight: 700; }
+.rt-label { font-size: 0.62rem; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.04em; }
+.rt-item.cal  .rt-valor { color: var(--azul); }
+.rt-item.prot .rt-valor { color: var(--prot); }
+.rt-item.carb .rt-valor { color: var(--carb); }
+.rt-item.gras .rt-valor { color: var(--gras); }
+
+.receta-detalle-ing {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--gris-claro);
+  color: var(--gris-oscuro);
+}
+
+.receta-detalle-ing:last-child { border-bottom: none; }
+.receta-vacia { text-align: center; color: var(--gris-medio); font-size: 0.85rem; padding: 1rem 0; }
+
+body.oscuro .receta-card-nombre { color: #e2e8f0; }
+body.oscuro .receta-totales { background: #1e3a5f; border-color: #334155; }
+body.oscuro .receta-detalle-ing { color: #cbd5e1; border-bottom-color: #1e293b; }

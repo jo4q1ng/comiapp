@@ -34,6 +34,7 @@ function mostrarSeccion(seccion) {
   if (seccion === 'bienestar') { renderBienestarHistorial(); cargarBienestarHoy(); }
   if (seccion === 'inicio')   renderComidas();
   if (seccion === 'ejercicio') renderEjercicio();
+  if (seccion === 'recetas') renderRecetas();
 }
 
 function abrirMenuMas() {
@@ -1119,6 +1120,244 @@ function eliminarEjercicio(i) {
   ejercicios.splice(i, 1);
   localStorage.setItem(`comiapp-ejercicio-${fecha}`, JSON.stringify(ejercicios));
   renderEjercicio();
+}
+
+// ─── Recetas ──────────────────────────────────────────────
+let recetaEditandoIdx = null;
+let recetaDetalleIdx  = null;
+
+function cargarRecetas() {
+  return JSON.parse(localStorage.getItem('comiapp-recetas') || '[]');
+}
+
+function guardarRecetas(recetas) {
+  localStorage.setItem('comiapp-recetas', JSON.stringify(recetas));
+}
+
+function renderRecetas() {
+  const lista   = document.getElementById('recetas-lista');
+  const recetas = cargarRecetas();
+
+  if (recetas.length === 0) {
+    lista.innerHTML = '<p class="receta-vacia">Sin recetas aún. ¡Crea tu primera receta!</p>';
+    return;
+  }
+
+  lista.innerHTML = recetas.map((r, i) => {
+    const porcion = calcularTotalesReceta(r);
+    return `
+      <div class="receta-card" onclick="verDetalleReceta(${i})">
+        <div class="receta-card-info">
+          <span class="receta-card-nombre">${r.nombre}</span>
+          <span class="receta-card-macros">P:${formatNum(porcion.proteinas)}g C:${formatNum(porcion.carbos)}g G:${formatNum(porcion.grasas)}g · ${r.porciones} porción(es)</span>
+        </div>
+        <span class="receta-card-kcal">${formatNum(porcion.calorias)} kcal</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function calcularTotalesReceta(receta) {
+  const total = receta.ingredientes.reduce((acc, ing) => {
+    const factor = (parseFloat(ing.gramos) || 0) / 100;
+    return {
+      calorias:  acc.calorias  + (parseFloat(ing.calorias)  || 0) * factor,
+      proteinas: acc.proteinas + (parseFloat(ing.proteinas) || 0) * factor,
+      carbos:    acc.carbos    + (parseFloat(ing.carbos)    || 0) * factor,
+      grasas:    acc.grasas    + (parseFloat(ing.grasas)    || 0) * factor
+    };
+  }, { calorias: 0, proteinas: 0, carbos: 0, grasas: 0 });
+
+  const porciones = parseFloat(receta.porciones) || 1;
+  return {
+    calorias:  parseFloat((total.calorias  / porciones).toFixed(1)),
+    proteinas: parseFloat((total.proteinas / porciones).toFixed(1)),
+    carbos:    parseFloat((total.carbos    / porciones).toFixed(1)),
+    grasas:    parseFloat((total.grasas    / porciones).toFixed(1))
+  };
+}
+
+function mostrarFormReceta(idx = null) {
+  recetaEditandoIdx = idx;
+  document.getElementById('recetas-lista-container').classList.add('oculto');
+  document.getElementById('receta-detalle-container').classList.add('oculto');
+  document.getElementById('receta-form-container').classList.remove('oculto');
+
+  const recetas = cargarRecetas();
+  const receta  = idx !== null ? recetas[idx] : null;
+
+  document.getElementById('receta-form-titulo').textContent = receta ? 'Editar receta' : 'Nueva receta';
+  document.getElementById('receta-nombre').value    = receta ? receta.nombre    : '';
+  document.getElementById('receta-porciones').value = receta ? receta.porciones : 1;
+
+  const cont = document.getElementById('receta-ingredientes');
+  cont.innerHTML = '';
+
+  if (receta && receta.ingredientes.length > 0) {
+    receta.ingredientes.forEach(ing => agregarIngrediente(ing));
+  } else {
+    agregarIngrediente();
+  }
+
+  actualizarTotalesReceta();
+}
+
+function cancelarFormReceta() {
+  document.getElementById('receta-form-container').classList.add('oculto');
+  document.getElementById('recetas-lista-container').classList.remove('oculto');
+  recetaEditandoIdx = null;
+}
+
+function agregarIngrediente(datos = null) {
+  const cont = document.getElementById('receta-ingredientes');
+  const idx  = cont.children.length;
+
+  const div = document.createElement('div');
+  div.className = 'ingrediente-row';
+  div.innerHTML = `
+    <input type="text"   placeholder="Ingrediente"   class="ing-nombre"    value="${datos ? datos.nombre    : ''}" oninput="actualizarTotalesReceta()" />
+    <input type="number" placeholder="g"             class="ing-gramos"    value="${datos ? datos.gramos    : ''}" oninput="actualizarTotalesReceta()" />
+    <button class="btn-ing-eliminar" onclick="this.parentElement.remove();actualizarTotalesReceta()">✕</button>
+    <input type="number" placeholder="kcal/100g"     class="ing-calorias"  value="${datos ? datos.calorias  : ''}" oninput="actualizarTotalesReceta()" style="grid-column:1" />
+    <input type="number" placeholder="Prot g/100g"   class="ing-proteinas" value="${datos ? datos.proteinas : ''}" oninput="actualizarTotalesReceta()" />
+    <input type="number" placeholder="Carb g/100g"   class="ing-carbos"    value="${datos ? datos.carbos    : ''}" oninput="actualizarTotalesReceta()" />
+    <input type="number" placeholder="Gras g/100g"   class="ing-grasas"    value="${datos ? datos.grasas    : ''}" oninput="actualizarTotalesReceta()" style="grid-column:1" />
+  `;
+  cont.appendChild(div);
+}
+
+function actualizarTotalesReceta() {
+  const porciones = parseFloat(document.getElementById('receta-porciones').value) || 1;
+  const rows      = document.getElementById('receta-ingredientes').children;
+  let total = { calorias: 0, proteinas: 0, carbos: 0, grasas: 0 };
+
+  Array.from(rows).forEach(row => {
+    const gramos    = parseFloat(row.querySelector('.ing-gramos')?.value)    || 0;
+    const calorias  = parseFloat(row.querySelector('.ing-calorias')?.value)  || 0;
+    const proteinas = parseFloat(row.querySelector('.ing-proteinas')?.value) || 0;
+    const carbos    = parseFloat(row.querySelector('.ing-carbos')?.value)    || 0;
+    const grasas    = parseFloat(row.querySelector('.ing-grasas')?.value)    || 0;
+    const f = gramos / 100;
+    total.calorias  += calorias  * f;
+    total.proteinas += proteinas * f;
+    total.carbos    += carbos    * f;
+    total.grasas    += grasas    * f;
+  });
+
+  const porPorcion = {
+    calorias:  (total.calorias  / porciones).toFixed(1),
+    proteinas: (total.proteinas / porciones).toFixed(1),
+    carbos:    (total.carbos    / porciones).toFixed(1),
+    grasas:    (total.grasas    / porciones).toFixed(1)
+  };
+
+  document.getElementById('receta-totales').innerHTML = `
+    <p style="font-size:0.75rem;color:var(--gris-medio);margin-bottom:0.5rem">Por porción (${porciones} porción${porciones > 1 ? 'es' : ''} en total)</p>
+    <div class="receta-totales-grid">
+      <div class="rt-item cal"><span class="rt-valor">${formatNum(porPorcion.calorias)}</span><span class="rt-label">kcal</span></div>
+      <div class="rt-item prot"><span class="rt-valor">${formatNum(porPorcion.proteinas)}g</span><span class="rt-label">prot</span></div>
+      <div class="rt-item carb"><span class="rt-valor">${formatNum(porPorcion.carbos)}g</span><span class="rt-label">carb</span></div>
+      <div class="rt-item gras"><span class="rt-valor">${formatNum(porPorcion.grasas)}g</span><span class="rt-label">gras</span></div>
+    </div>
+  `;
+}
+
+function guardarReceta() {
+  const nombre    = document.getElementById('receta-nombre').value.trim();
+  const porciones = parseFloat(document.getElementById('receta-porciones').value) || 1;
+  if (!nombre) { alert('Escribe el nombre de la receta'); return; }
+
+  const rows = document.getElementById('receta-ingredientes').children;
+  const ingredientes = Array.from(rows).map(row => ({
+    nombre:    row.querySelector('.ing-nombre')?.value.trim()     || '',
+    gramos:    parseFloat(row.querySelector('.ing-gramos')?.value)    || 0,
+    calorias:  parseFloat(row.querySelector('.ing-calorias')?.value)  || 0,
+    proteinas: parseFloat(row.querySelector('.ing-proteinas')?.value) || 0,
+    carbos:    parseFloat(row.querySelector('.ing-carbos')?.value)    || 0,
+    grasas:    parseFloat(row.querySelector('.ing-grasas')?.value)    || 0
+  })).filter(ing => ing.nombre && ing.gramos > 0);
+
+  if (ingredientes.length === 0) { alert('Agrega al menos un ingrediente con gramos'); return; }
+
+  const recetas = cargarRecetas();
+  const receta  = { nombre, porciones, ingredientes };
+
+  if (recetaEditandoIdx !== null) recetas[recetaEditandoIdx] = receta;
+  else recetas.push(receta);
+
+  guardarRecetas(recetas);
+  cancelarFormReceta();
+  renderRecetas();
+  alert('✅ Receta guardada');
+}
+
+function verDetalleReceta(idx) {
+  recetaDetalleIdx = idx;
+  const recetas = cargarRecetas();
+  const receta  = recetas[idx];
+  const porcion = calcularTotalesReceta(receta);
+
+  document.getElementById('recetas-lista-container').classList.add('oculto');
+  document.getElementById('receta-form-container').classList.add('oculto');
+  document.getElementById('receta-detalle-container').classList.remove('oculto');
+  document.getElementById('receta-detalle-nombre').textContent = receta.nombre;
+
+  document.getElementById('receta-detalle-contenido').innerHTML = `
+    <div class="receta-totales" style="margin-bottom:0.75rem">
+      <p style="font-size:0.75rem;color:var(--gris-medio);margin-bottom:0.5rem">Por porción · ${receta.porciones} porción(es) en total</p>
+      <div class="receta-totales-grid">
+        <div class="rt-item cal"><span class="rt-valor">${formatNum(porcion.calorias)}</span><span class="rt-label">kcal</span></div>
+        <div class="rt-item prot"><span class="rt-valor">${formatNum(porcion.proteinas)}g</span><span class="rt-label">prot</span></div>
+        <div class="rt-item carb"><span class="rt-valor">${formatNum(porcion.carbos)}g</span><span class="rt-label">carb</span></div>
+        <div class="rt-item gras"><span class="rt-valor">${formatNum(porcion.grasas)}g</span><span class="rt-label">gras</span></div>
+      </div>
+    </div>
+    <h2 style="margin-bottom:0.5rem">Ingredientes</h2>
+    ${receta.ingredientes.map(ing => `
+      <div class="receta-detalle-ing">
+        <span>${ing.nombre}</span>
+        <span style="color:var(--gris-medio)">${ing.gramos}g</span>
+      </div>
+    `).join('')}
+    <button class="btn-cancelar" onclick="eliminarReceta(${idx})" style="margin-top:1rem;color:#ef4444;border-color:#ef4444">🗑️ Eliminar receta</button>
+  `;
+}
+
+function cerrarDetalleReceta() {
+  document.getElementById('receta-detalle-container').classList.add('oculto');
+  document.getElementById('recetas-lista-container').classList.remove('oculto');
+  recetaDetalleIdx = null;
+}
+
+function editarReceta() {
+  if (recetaDetalleIdx === null) return;
+  mostrarFormReceta(recetaDetalleIdx);
+}
+
+function eliminarReceta(idx) {
+  if (!confirm('¿Eliminar esta receta?')) return;
+  const recetas = cargarRecetas();
+  recetas.splice(idx, 1);
+  guardarRecetas(recetas);
+  cerrarDetalleReceta();
+  renderRecetas();
+}
+
+function agregarRecetaARegistro() {
+  if (recetaDetalleIdx === null) return;
+  const recetas = cargarRecetas();
+  const receta  = recetas[recetaDetalleIdx];
+  const porcion = calcularTotalesReceta(receta);
+
+  cerrarDetalleReceta();
+  mostrarConfirmacion({
+    nombre:    receta.nombre,
+    calorias:  porcion.calorias,
+    proteinas: porcion.proteinas,
+    carbos:    porcion.carbos,
+    grasas:    porcion.grasas,
+    por100g:   false
+  });
 }
 
 // ─── Init ─────────────────────────────────────────────────
