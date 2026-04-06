@@ -585,17 +585,91 @@ body.oscuro {
   --sombra:      0 2px 12px rgba(0,0,0,0.3);
 }
 
-body.oscuro header { background: #0f172a; border-bottom: 1px solid #1e293b; }
-body.oscuro .nav-bottom { background: #0f172a; border-top: 1px solid #1e293b; }
-body.oscuro .sub-tabs { background: #0f172a; border-bottom-color: #1e293b; }
-body.oscuro .comida-header { background: #0f172a; }
+/* ── Modo oscuro ── */
+body.oscuro {
+  --azul:        #60a5fa;
+  --azul-mid:    #93c5fd;
+  --azul-claro:  #1e3a5f;
+  --azul-accent: #60a5fa;
+  --carbon:      #f1f5f9;
+  --gris-oscuro: #e2e8f0;
+  --gris-medio:  #94a3b8;
+  --gris-claro:  #1e293b;
+  --borde:       #334155;
+  --blanco:      #0f172a;
+  --verde:       #4ade80;
+  --prot:        #60a5fa;
+  --carb:        #fbbf24;
+  --gras:        #f87171;
+  --sombra:      0 2px 12px rgba(0,0,0,0.4);
+}
+
+body.oscuro header                { background: #0f172a; border-bottom: 1px solid #1e293b; }
+body.oscuro .nav-bottom           { background: #0f172a; border-top: 1px solid #1e293b; }
+body.oscuro .nav-btn              { color: #64748b; }
+body.oscuro .nav-btn.activo       { color: #60a5fa; }
+body.oscuro .sub-tabs             { background: #0f172a; border-bottom-color: #1e293b; }
+body.oscuro .sub-tab              { color: #64748b; }
+body.oscuro .sub-tab.activo       { color: #60a5fa; border-bottom-color: #60a5fa; }
+body.oscuro .comida-header        { background: #0f172a; color: #e2e8f0; }
+body.oscuro .comida-seccion       { background: #0f172a; border-color: #1e293b; }
+body.oscuro .comida-lista li      { border-bottom-color: #1e293b; }
+body.oscuro .comida-vacia         { color: #64748b; }
+body.oscuro .li-nombre            { color: #e2e8f0; }
+body.oscuro .li-macros            { color: #64748b; }
+body.oscuro .historial-dia        { border-color: #1e293b; }
 body.oscuro .historial-dia-header { background: #1e293b; }
-body.oscuro .menu-mas-box { background: #0f172a; }
-body.oscuro .modal-box { background: #0f172a; }
-body.oscuro input, body.oscuro select, body.oscuro textarea { background: #1e293b; color: #f1f5f9; border-color: #334155; }
-body.oscuro .resultado-item { background: #1e293b; }
-body.oscuro .calc-opcion { background: #1e293b; color: #cbd5e1; border-color: #334155; }
-body.oscuro .emoji-btn { background: #1e293b; border-color: #334155; }
-body.oscuro .accion-btn { background: #1e3a5f; }
-body.oscuro .resumen-card { background: #0f172a; }
-body.oscuro .meta-barra-track { background: #1e293b; }
+body.oscuro .historial-dia-fecha  { color: #e2e8f0; }
+body.oscuro .historial-alimento   { color: #cbd5e1; border-bottom-color: #1e293b; }
+body.oscuro .historial-macros     { color: #64748b; }
+body.oscuro .historial-vacio      { color: #64748b; }
+body.oscuro .menu-mas-box         { background: #0f172a; }
+body.oscuro .menu-mas-item        { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+body.oscuro .menu-mas-titulo      { color: #64748b; }
+body.oscuro .modal-box            { background: #0f172a; }
+body.oscuro .modal-titulo         { color: #f1f5f9; }
+body.oscuro input,
+body.oscuro select,
+body.oscuro textarea              { background: #1e293b; color: #f1f5f9; border-color: #334155; }
+body.oscuro input::placeholder,
+body.oscuro textarea::placeholder { color: #475569; }
+body.oscuro .formulario           { background: #0f172a; border-color: #1e293b; }
+body.oscuro h2                    { color: #64748b; }
+body.oscuro .resultado-item       { background: #1e293b; border-color: #334155; }
+body.oscuro .resultado-nombre     { color: #e2e8f0; }
+body.oscuro .resultado-macros     { color: #64748b; }
+body.oscuro .calc-opcion          { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+body.oscuro .calc-opcion.activo   { background: #1e3a5f; color: #93c5fd; border-color: #60a5fa; }
+body.oscuro .calc-resultado-item  { background: #1e293b; border-color: #334155; }
+body.oscuro .calc-resultado-label { color: #cbd5e1; }
+body.oscuro .calc-macro-box       { background: #1e293b; border-color: #334155; }
+body.oscuro .calc-macro-box .label { color: #64748b; }
+body.oscuro .emoji-btn            { background: #1e293b; border-color: #334155; }
+body.oscuro .emoji-btn.seleccionado { background: #1e3a5f; border-color: #60a5fa; }
+body.oscuro .accion-btn           { background: #1e3a5f; color: #93c5fd; }
+body.oscuro .resumen-card         { background: #0f172a; border-color: #1e293b; }
+body.oscuro .rc-label             { color: #64748b; }
+body.oscuro .meta-barra-track     { background: #1e293b; border-color: #334155; }
+body.oscuro .meta-barra-label     { color: #e2e8f0; }
+body.oscuro .meta-barra-valor     { color: #64748b; }
+body.oscuro .btn-cancelar         { background: #1e293b; color: #94a3b8; border-color: #334155; }
+body.oscuro .separador            { color: #475569; }
+body.oscuro .separador::before,
+body.oscuro .separador::after     { background: #334155; }
+body.oscuro .estado-texto         { color: #64748b; }
+body.oscuro .campo-nutriente label { color: #cbd5e1; }
+body.oscuro .confirmar-titulo     { color: #60a5fa; }
+body.oscuro #confirmar-info       { background: #1e3a5f; color: #e2e8f0; }
+body.oscuro .calculo-box          { background: #1e3a5f; color: #e2e8f0; }
+body.oscuro .imc-resultado        { color: #94a3b8; }
+body.oscuro .imc-valor            { color: #f1f5f9; }
+body.oscuro .rec-titulo           { color: #f1f5f9; }
+body.oscuro .rec-detalle          { color: #cbd5e1; }
+body.oscuro .bienestar-dia-datos  { color: #e2e8f0; }
+body.oscuro .bienestar-nota-texto { color: #64748b; }
+body.oscuro .bienestar-vacio      { color: #64748b; }
+body.oscuro .bienestar-slider-val { color: #60a5fa; }
+body.oscuro .leyenda              { color: #475569; }
+body.oscuro .agua-meta-texto      { color: #64748b; }
+body.oscuro .progreso-alimento-nombre { color: #cbd5e1; }
+body.oscuro .btn-editar-metas     { color: #64748b; border-color: #334155; }
