@@ -965,8 +965,24 @@ function guardarMetaAgua() {
   renderVasos();
 }
 
+// ─── Modo oscuro ──────────────────────────────────────────
+function toggleModoOscuro() {
+  const oscuro = document.body.classList.toggle('oscuro');
+  localStorage.setItem('comiapp-modo-oscuro', oscuro ? '1' : '0');
+  document.getElementById('btn-modo').textContent = oscuro ? '☀️' : '🌙';
+}
+
+function cargarModoOscuro() {
+  const oscuro = localStorage.getItem('comiapp-modo-oscuro') === '1';
+  if (oscuro) {
+    document.body.classList.add('oscuro');
+    document.getElementById('btn-modo').textContent = '☀️';
+  }
+}
+
 // ─── Init ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  cargarModoOscuro();
   pedirPermisoNotificaciones();
   iniciarVerificadorCreatina();
   mostrarHoraCreatina();
