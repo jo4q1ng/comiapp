@@ -499,72 +499,84 @@ async function capturarVisor() {
   });
 
   try {
-    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+      const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': CONFIG.ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 256,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-            { type: 'text', text: 'Esta es una tabla nutricional chilena. Extrae los valores de la columna "100g" o "100ml" para: Energía en kcal, Proteínas en g, Grasa total en g, H de C disp o Carbohidratos en g. Si ves el nombre del producto, extráelo también. Responde SOLO con JSON sin texto extra: {"nombre":"","calorias":0,"proteinas":0,"carbos":0,"grasas":0}' }
-          ]
-        }]
-      })
-    });
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': CONFIG.ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 256,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+              { type: 'text', text: 'Esta es una tabla nutricional chilena. Extrae los valores de la columna "100g" o "100ml" para: Energía en kcal, Proteínas en g, Grasa total en g, H de C disp o Carbohidratos en g. Si ves el nombre del producto, extráelo también. Responde SOLO con JSON sin texto extra: {"nombre":"","calorias":0,"proteinas":0,"carbos":0,"grasas":0}' }
+            ]
+          }]
+        })
+      });
 
-    const data   = await res.json();
-    const texto  = data.content[0].text.trim();
-    console.log('Claude:', texto);
+      console.log('Status:', res.status);
+      const data = await res.json();
+      console.log('Respuesta completa:', JSON.stringify(data));
 
-    const macros = JSON.parse(texto);
+      if (data.error) {
+        estado.textContent = `Error API: ${data.error.message}`;
+        return;
+      }
 
-    // Guardar en caché
-    if (macros.nombre) {
-      guardarEnCache(macros);
+      if (!data.content || !data.content[0]) {
+        estado.textContent = 'Respuesta vacía de la API';
+        return;
+      }
+
+      const texto = data.content[0].text.trim();
+      console.log('Texto Claude:', texto);
+
+      // Limpiar posibles markdown que Claude agregue
+      const jsonLimpio = texto.replace(/```json|```/g, '').trim();
+      const macros = JSON.parse(jsonLimpio);
+
+      if (macros.nombre) guardarEnCache(macros);
+
+      estado.textContent = '✅ Tabla leída correctamente. Verifica y corrige si es necesario.';
+
+      if (macros.nombre)    document.getElementById('foto-nombre').value    = macros.nombre;
+      if (macros.calorias)  document.getElementById('foto-calorias').value  = String(macros.calorias).replace('.', ',');
+      if (macros.proteinas) document.getElementById('foto-proteinas').value = String(macros.proteinas).replace('.', ',');
+      if (macros.carbos)    document.getElementById('foto-carbos').value    = String(macros.carbos).replace('.', ',');
+      if (macros.grasas)    document.getElementById('foto-grasas').value    = String(macros.grasas).replace('.', ',');
+
+    } catch (e) {
+      console.error('Error completo:', e.name, e.message, e);
+      estado.textContent = `⚠️ Error: ${e.message}. Revisa la consola.`;
     }
-
-    estado.textContent = '✅ Tabla leída correctamente. Verifica y corrige si es necesario.';
-
-    if (macros.nombre)    document.getElementById('foto-nombre').value    = macros.nombre;
-    if (macros.calorias)  document.getElementById('foto-calorias').value  = String(macros.calorias).replace('.', ',');
-    if (macros.proteinas) document.getElementById('foto-proteinas').value = String(macros.proteinas).replace('.', ',');
-    if (macros.carbos)    document.getElementById('foto-carbos').value    = String(macros.carbos).replace('.', ',');
-    if (macros.grasas)    document.getElementById('foto-grasas').value    = String(macros.grasas).replace('.', ',');
-
-  } catch (e) {
-    console.error('Error Claude:', e);
-    estado.textContent = '⚠️ Error al analizar. Ingresa los valores manualmente.';
   }
-}
 
-function cerrarVisor() {
-  if (streamActivo) { streamActivo.getTracks().forEach(t => t.stop()); streamActivo = null; }
-  document.getElementById('visor-container').classList.add('oculto');
-  document.getElementById('btn-abrir-visor').classList.remove('oculto');
-}
+  function cerrarVisor() {
+    if (streamActivo) { streamActivo.getTracks().forEach(t => t.stop()); streamActivo = null; }
+    document.getElementById('visor-container').classList.add('oculto');
+    document.getElementById('btn-abrir-visor').classList.remove('oculto');
+  }
 
-function extraerMacros(texto) {
-  const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  function extraerMacros(texto) {
+    const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-  function primerNumero(linea) {
-    const nums = linea.match(/\d+[,.]\d+|\d+/g);
-    if (!nums) return null;
-    for (const n of nums) {
-      const val = parseFloat(n.replace(',', '.'));
-      if (val > 0 && val < 5000) return val;
+    function primerNumero(linea) {
+      const nums = linea.match(/\d+[,.]\d+|\d+/g);
+      if (!nums) return null;
+      for (const n of nums) {
+        const val = parseFloat(n.replace(',', '.'));
+        if (val > 0 && val < 5000) return val;
+      }
+      return null;
     }
-    return null;
-  }
 
   function buscarLinea(patrones) {
     for (let i = 0; i < lineas.length; i++) {
