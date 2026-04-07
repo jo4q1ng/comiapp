@@ -4,6 +4,112 @@ function formatNum(n) {
   return val % 1 === 0 ? val.toString() : val.toFixed(1).replace('.', ',');
 }
 
+function actualizarContadorCache() {
+  const el = document.getElementById('cache-count');
+  if (!el) return;
+  const n = cargarCache().length;
+  el.textContent = n > 0 ? `${n} producto${n > 1 ? 's' : ''} guardado${n > 1 ? 's' : ''}` : '';
+}
+
+// ─── Caché de productos escaneados ───────────────────────
+function cargarCache() {
+  return JSON.parse(localStorage.getItem('comiapp-cache-productos') || '[]');
+}
+
+function guardarEnCache(producto) {
+  const cache = cargarCache();
+  const nombre = (producto.nombre || '').toLowerCase().trim();
+  if (!nombre) return;
+
+  // Evitar duplicados por nombre similar
+  const existe = cache.findIndex(p => p.nombre.toLowerCase() === nombre);
+  if (existe >= 0) {
+    cache[existe] = producto; // Actualizar si ya existe
+  } else {
+    cache.unshift(producto); // Agregar al inicio
+    if (cache.length > 100) cache.pop(); // Máximo 100 productos
+  }
+
+  localStorage.setItem('comiapp-cache-productos', JSON.stringify(cache));
+  renderCacheProductos();
+}
+
+function eliminarDeCache(idx) {
+  const cache = cargarCache();
+  cache.splice(idx, 1);
+  localStorage.setItem('comiapp-cache-productos', JSON.stringify(cache));
+  renderCacheProductos();
+}
+
+function renderCacheProductos() {
+  const div   = document.getElementById('cache-productos-lista');
+  if (!div) return;
+  const cache = cargarCache();
+
+  if (cache.length === 0) {
+    div.innerHTML = '<p class="receta-vacia">Aún no has escaneado productos. Los productos escaneados aparecerán aquí para reutilizarlos rápidamente.</p>';
+    return;
+  }
+
+  div.innerHTML = cache.map((p, i) => `
+    <div class="receta-card">
+      <div class="receta-card-info" onclick="usarProductoCache(${i})" style="cursor:pointer">
+        <span class="receta-card-nombre">${p.nombre}</span>
+        <span class="receta-card-macros">P:${formatNum(p.proteinas)}g · C:${formatNum(p.carbos)}g · G:${formatNum(p.grasas)}g</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <div class="receta-card-kcal" onclick="usarProductoCache(${i})" style="cursor:pointer">
+          ${formatNum(p.calorias)}
+          <span>kcal/100g</span>
+        </div>
+        <button class="btn-eliminar" onclick="eliminarDeCache(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function usarProductoCache(idx) {
+  const cache   = cargarCache();
+  const producto = cache[idx];
+  mostrarConfirmacion({
+    nombre:    producto.nombre,
+    calorias:  producto.calorias,
+    proteinas: producto.proteinas,
+    carbos:    producto.carbos,
+    grasas:    producto.grasas,
+    por100g:   true
+  });
+}
+
+function buscarEnCache(q) {
+  if (q.length < 2) { renderCacheProductos(); return; }
+  const cache     = cargarCache();
+  const resultado = cache.filter(p => p.nombre.toLowerCase().includes(q.toLowerCase()));
+  const div       = document.getElementById('cache-productos-lista');
+  if (!div) return;
+
+  if (resultado.length === 0) {
+    div.innerHTML = '<p class="receta-vacia">Sin resultados en productos guardados.</p>';
+    return;
+  }
+
+  div.innerHTML = resultado.map((p, i) => {
+    const idx = cache.indexOf(p);
+    return `
+      <div class="receta-card">
+        <div class="receta-card-info" onclick="usarProductoCache(${idx})" style="cursor:pointer">
+          <span class="receta-card-nombre">${p.nombre}</span>
+          <span class="receta-card-macros">P:${formatNum(p.proteinas)}g · C:${formatNum(p.carbos)}g · G:${formatNum(p.grasas)}g</span>
+        </div>
+        <div class="receta-card-kcal" onclick="usarProductoCache(${idx})" style="cursor:pointer">
+          ${formatNum(p.calorias)}
+          <span>kcal/100g</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 // ─── Estado global ────────────────────────────────────────
 const hoy       = new Date();
 const claveHoy  = `comiapp-${hoy.toISOString().slice(0, 10)}`;
@@ -35,6 +141,10 @@ function mostrarSeccion(seccion) {
   if (seccion === 'inicio')   renderComidas();
   if (seccion === 'ejercicio') renderEjercicio();
   if (seccion === 'recetas') renderRecetas();
+  if (seccion === 'registro') {
+  renderCacheProductos();
+  actualizarContadorCache();
+}
 }
 
 function abrirMenuMas() {
@@ -356,7 +466,7 @@ async function capturarVisor() {
   ctx.drawImage(video, recX, recY, recW, recH, 0, 0, recW, recH);
 
   cerrarVisor();
-  estado.textContent = '🔍 Procesando...';
+  estado.textContent = '🤖 Analizando con IA...';
 
   document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg', 0.95);
   document.getElementById('foto-preview-container').classList.remove('oculto');
@@ -365,47 +475,51 @@ async function capturarVisor() {
   });
 
   try {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imageData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const avg = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-      const c   = avg > 128 ? Math.min(255, avg*1.4) : Math.max(0, avg*0.6);
-      d[i] = d[i+1] = d[i+2] = c;
+    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CONFIG.ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+            { type: 'text', text: 'Esta es una tabla nutricional chilena. Extrae los valores de la columna "100g" o "100ml" para: Energía en kcal, Proteínas en g, Grasa total en g, H de C disp o Carbohidratos en g. Si ves el nombre del producto, extráelo también. Responde SOLO con JSON sin texto extra: {"nombre":"","calorias":0,"proteinas":0,"carbos":0,"grasas":0}' }
+          ]
+        }]
+      })
+    });
+
+    const data   = await res.json();
+    const texto  = data.content[0].text.trim();
+    console.log('Claude:', texto);
+
+    const macros = JSON.parse(texto);
+
+    // Guardar en caché
+    if (macros.nombre) {
+      guardarEnCache(macros);
     }
-    ctx.putImageData(imageData, 0, 0);
 
-    const blob   = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-    const worker = await Tesseract.createWorker('spa', 1, {
-      logger: m => {
-        if (m.status === 'recognizing text')
-          estado.textContent = `Leyendo... ${Math.round(m.progress * 100)}%`;
-      }
-    });
+    estado.textContent = '✅ Tabla leída correctamente. Verifica y corrige si es necesario.';
 
-    await worker.setParameters({
-      tessedit_char_whitelist: 'abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789.,() ',
-      preserve_interword_spaces: '1'
-    });
+    if (macros.nombre)    document.getElementById('foto-nombre').value    = macros.nombre;
+    if (macros.calorias)  document.getElementById('foto-calorias').value  = String(macros.calorias).replace('.', ',');
+    if (macros.proteinas) document.getElementById('foto-proteinas').value = String(macros.proteinas).replace('.', ',');
+    if (macros.carbos)    document.getElementById('foto-carbos').value    = String(macros.carbos).replace('.', ',');
+    if (macros.grasas)    document.getElementById('foto-grasas').value    = String(macros.grasas).replace('.', ',');
 
-    const { data: { text } } = await worker.recognize(blob);
-    await worker.terminate();
-
-    console.log('Texto OCR:', text);
-    const macros = extraerMacros(text);
-    console.log('Macros:', macros);
-
-    if (macros.calorias)  document.getElementById('foto-calorias').value  = macros.calorias;
-    if (macros.proteinas) document.getElementById('foto-proteinas').value = macros.proteinas;
-    if (macros.carbos)    document.getElementById('foto-carbos').value    = macros.carbos;
-    if (macros.grasas)    document.getElementById('foto-grasas').value    = macros.grasas;
-
-    const n = [macros.calorias, macros.proteinas, macros.carbos, macros.grasas].filter(v => v > 0).length;
-    estado.textContent = n > 0
-      ? `✅ ${n} de 4 valores detectados. Verifica antes de agregar.`
-      : '⚠️ No se detectaron valores. Ingrésalos manualmente.';
   } catch (e) {
-    console.error('Error OCR:', e);
-    estado.textContent = '⚠️ Error al leer. Ingresa manualmente.';
+    console.error('Error Claude:', e);
+    estado.textContent = '⚠️ Error al analizar. Ingresa los valores manualmente.';
   }
 }
 
@@ -1414,4 +1528,6 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarHeaderAgua();
   renderComidas();
   cargarBienestarHoy();
+  renderCacheProductos();
+  actualizarContadorCache();
 });
