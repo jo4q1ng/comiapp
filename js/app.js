@@ -312,10 +312,19 @@ function confirmarAlimento() {
 
   alimentoPendiente = null;
   document.getElementById('confirmar-panel').classList.add('oculto');
+
+  // Limpiar todos los campos
   document.getElementById('buscador').value = '';
   document.getElementById('resultados-busqueda').innerHTML = '';
   document.getElementById('input-barras').value = '';
   document.getElementById('estado-escaner').textContent = '';
+  document.getElementById('nombre').value = '';
+  document.getElementById('calorias').value = '';
+  document.getElementById('proteinas').value = '';
+  document.getElementById('carbos').value = '';
+  document.getElementById('grasas').value = '';
+  document.getElementById('input-gramos').value = '';
+  document.getElementById('calculo-resultado').innerHTML = '';
 }
 
 function cancelarConfirmacion() {
@@ -393,25 +402,39 @@ async function buscarManualBarras() {
 
 async function buscarPorBarras(codigo) {
   try {
-    const res  = await fetch(`https://world.openfoodfacts.org/api/v0/product/${codigo}.json`);
+    const controller = new AbortController();
+    const timeout    = setTimeout(() => controller.abort(), 8000);
+
+    const res  = await fetch(
+      `https://world.openfoodfacts.org/api/v0/product/${codigo}.json`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeout);
+
     const data = await res.json();
     if (data.status !== 1 || !data.product) {
       document.getElementById('estado-escaner').textContent = 'Producto no encontrado. Intenta con el buscador.';
       return;
     }
+
     const p = data.product;
     const n = p.nutriments || {};
     document.getElementById('estado-escaner').textContent = '';
+
     mostrarConfirmacion({
       nombre:    p.product_name || 'Producto sin nombre',
-      calorias:  n['energy-kcal_100g']  || 0,
-      proteinas: n['proteins_100g']      || 0,
-      carbos:    n['carbohydrates_100g'] || 0,
-      grasas:    n['fat_100g']           || 0,
-      por100g: true
+      calorias:  n['energy-kcal_100g']   || 0,
+      proteinas: n['proteins_100g']       || 0,
+      carbos:    n['carbohydrates_100g']  || 0,
+      grasas:    n['fat_100g']            || 0,
+      por100g:   true
     });
-  } catch {
-    document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      document.getElementById('estado-escaner').textContent = 'Tiempo de espera agotado. Verifica tu conexión.';
+    } else {
+      document.getElementById('estado-escaner').textContent = 'Error al buscar el producto.';
+    }
   }
 }
 
@@ -419,13 +442,14 @@ async function buscarPorBarras(codigo) {
 function agregarManual() {
   const nombre = document.getElementById('nombre').value.trim();
   if (!nombre) { alert('Escribe el nombre del alimento'); return; }
+
+  const calorias  = parseFloat(document.getElementById('calorias').value)  || 0;
+  const proteinas = parseFloat(document.getElementById('proteinas').value) || 0;
+  const carbos    = parseFloat(document.getElementById('carbos').value)    || 0;
+  const grasas    = parseFloat(document.getElementById('grasas').value)    || 0;
+
   mostrarConfirmacion({
-    nombre,
-    calorias:  parseFloat(document.getElementById('calorias').value)  || 0,
-    proteinas: parseFloat(document.getElementById('proteinas').value) || 0,
-    carbos:    parseFloat(document.getElementById('carbos').value)    || 0,
-    grasas:    parseFloat(document.getElementById('grasas').value)    || 0,
-    por100g: false
+    nombre, calorias, proteinas, carbos, grasas, por100g: true
   });
 }
 
@@ -859,6 +883,11 @@ function renderHistorial() {
   const lista = document.getElementById('historial-lista');
   const dias  = [];
 
+  // Incluir hoy si tiene alimentos
+  if (alimentos.length > 0) {
+    dias.push({ fecha: hoy, items: alimentos, esHoy: true });
+  }
+
   for (let i = 1; i <= 30; i++) {
     const fecha = new Date(hoy);
     fecha.setDate(fecha.getDate() - i);
@@ -866,19 +895,30 @@ function renderHistorial() {
     const data  = localStorage.getItem(clave);
     if (data) {
       const items = JSON.parse(data);
-      if (items.length > 0) dias.push({ fecha, items });
+      if (items.length > 0) dias.push({ fecha, items, esHoy: false });
     }
   }
 
-  if (dias.length === 0) { lista.innerHTML = '<p class="historial-vacio">Sin registros anteriores</p>'; return; }
+  if (dias.length === 0) {
+    lista.innerHTML = '<p class="historial-vacio">Sin registros aún</p>';
+    return;
+  }
 
   lista.innerHTML = dias.map((dia, idx) => {
-    const fechaStr   = dia.fecha.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
+    const fechaStr   = dia.esHoy
+      ? 'Hoy'
+      : dia.fecha.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
     const totalKcal  = dia.items.reduce((s, a) => s + (parseFloat(a.calorias)  || 0), 0);
     const totalProt  = dia.items.reduce((s, a) => s + (parseFloat(a.proteinas) || 0), 0);
     const totalCarb  = dia.items.reduce((s, a) => s + (parseFloat(a.carbos)    || 0), 0);
     const totalGras  = dia.items.reduce((s, a) => s + (parseFloat(a.grasas)    || 0), 0);
-    const alims      = dia.items.map(a => `<div class="historial-alimento"><span>${a.nombre}</span><span class="historial-alimento-kcal">${formatNum(a.calorias)} kcal</span></div>`).join('');
+    const alims      = dia.items.map(a => `
+      <div class="historial-alimento">
+        <span>${a.nombre}</span>
+        <span class="historial-alimento-kcal">${formatNum(a.calorias)} kcal</span>
+      </div>
+    `).join('');
+
     return `
       <div class="historial-dia">
         <div class="historial-dia-header" onclick="toggleHistorialDia(${idx})">
@@ -889,7 +929,11 @@ function renderHistorial() {
           </div>
         </div>
         <div class="historial-dia-body" id="body-h-${idx}">
-          <div class="historial-macros"><span>💪 P: ${formatNum(totalProt)}g</span><span>🌾 C: ${formatNum(totalCarb)}g</span><span>🥑 G: ${formatNum(totalGras)}g</span></div>
+          <div class="historial-macros">
+            <span>💪 P: ${formatNum(totalProt)}g</span>
+            <span>🌾 C: ${formatNum(totalCarb)}g</span>
+            <span>🥑 G: ${formatNum(totalGras)}g</span>
+          </div>
           ${alims}
         </div>
       </div>
