@@ -1,5 +1,7 @@
 const CONFIG = { ANTHROPIC_KEY: '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' };
 
+
+
 // ─── Helpers ─────────────────────────────────────────────
 function formatNum(n) {
   const val = parseFloat(n) || 0;
